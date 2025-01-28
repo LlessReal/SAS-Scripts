@@ -3,6 +3,7 @@
 if WinActive("C:\Windows\system32\notepad.exe") {
   ~ctrl & r:: Reload
 } ; If notepad.exe is open, Ctrl + R will reload the script (Save first tho)
+;#######################
 
 ; COMMANDS SO FAR
 +RButton::QuickTransfer() ; Runs function that transfer callers
@@ -10,6 +11,9 @@ if WinActive("C:\Windows\system32\notepad.exe") {
 ~Ctrl & 1::NotifySuppMsgMaker() ; Runs the function that creates a message to inform support specialists about invoices
 ~Ctrl & 2::Send "Ready For Processing" ; # Sends "Ready For Processing" lol , nothing more
 
+; #######################
+; ALL FUNCTIONS ARE BELOW
+; #######################
 NotifySuppMsgMaker() {
   global SerialNum := InputBox("Enter the serial number.", "Serial Number", "w500 h100")
   global SupportName := InputBox("Enter the support person's name.", "Support Person", "w500 h100")
