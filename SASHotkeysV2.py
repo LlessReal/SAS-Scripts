@@ -7,7 +7,6 @@ import pyperclip
 
 root = tk.Tk() # Creates main window
 root.wait_visibility() # Wait until the label becomes visible
-root.withdraw()
 root.geometry("240x75") # Sets the window size
 
 PhoneNumberLabel = tk.Label(root, text = "Phone Number")
@@ -15,6 +14,7 @@ PhoneNumberTyped = tk.StringVar()
 PhoneNumberEntry = tk.Entry(root, textvariable = PhoneNumberTyped)
 PhoneNumberLabel.grid(row=0,column=0)   
 PhoneNumberEntry.grid(row=0,column=1)   
+root.withdraw()
 
 def ShowTkinterWindow():
     root.deiconify()
@@ -59,7 +59,9 @@ def AutoTransfer(event):
     pyautogui.moveTo(InitialPosition) # End
 
 PhoneNumberEntry.bind("<Return>", AutoTransfer)
-keyboard.add_hotkey("ctrl+F1", ShowTkinterWindow)
-print("Press CTRL+F1 to activate the hotkey.")
+keyboard.add_hotkey("ctrl+f1", ShowTkinterWindow)
 root.mainloop() # Keeps the Tkinter event loop running to make gui elements work right
 keyboard.wait()
+
+
+
