@@ -10,9 +10,10 @@ running = True
 # Before you start line up the columns
 # You would get this by hovering over the app in task bar
 ExcelSheetName = "BOR_POAP" # Doesn't have to be the full thing, but enough to distinguish it from other windows
-eProDocName = "Manage Requisitions" #Same thing
-ReqIDHeaderLetter = "E"
-NAHeaderLetter = "F"
+eProDocName = "Manage Requisitions" # Same thing, but put the window in the middle monitor or it wont work
+ReqIDHeaderLetter = "JayWorkE"
+NAHeaderLetter = "JayWorkF"
+FontImageName = "JayWorkFont"
 ShiftToInfo = 80 # Test things out
 CurrentPath = os.path.dirname(__file__) # Gonna need this
 # Must be on 200% on excel 
@@ -61,7 +62,7 @@ def GoToSameBox():
 def NextRow(Status="Success",Swipes=1,NextBox=1):
     if Status == "Fail": # If Fail is in paremeter, this gets printed
         print("Process failed, doing next line")
-    ScrollDownSign = pya.locateOnScreen(f"{CurrentPath}\\ScrollDownSign.png")
+    ScrollDownSign = pya.locateOnScreen(rf"{CurrentPath}\eProImages\ScrollDownSign.png",confidence=0.9)
     keyboard.write("\n")
     for i in range(Swipes + 1):
         pya.click(ScrollDownSign)
@@ -79,7 +80,7 @@ def MarkNA(cordx,cordy,BoostExistent=False): # Put in coordinates of where the N
     keyboard.write("N/A\n") # Puts in Req ID and paste it (with enter)
     pya.press('up') # Goes back to OG box
     time.sleep(0.5) # Wait for buckets to ungray out
-    FontText = pya.locateOnScreen(f"{CurrentPath}\\font.png") # So it can find font but not the bucket.... INTERESTINGGGG
+    FontText = pya.locateOnScreen(fr"{CurrentPath}\eProImages\{FontImageName}.png",confidence=0.9) # So it can find font but not the bucket.... INTERESTINGGGG
     x, y = pya.center(FontText) # Get the center of the button
     pya.click(x + 70, y - 40)
 
@@ -87,10 +88,10 @@ def MarkNA(cordx,cordy,BoostExistent=False): # Put in coordinates of where the N
     # Make sure bucket is on red
 
 def OpenWindow(WindowName):
-            Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
-            if Window.isMinimized: # If the window is minimized
-                Window.restore() # Unminimizes it
-            Window.activate()  # Activates the window
+    Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
+    if Window.isMinimized: # If the window is minimized
+        Window.restore() # Unminimizes it
+    Window.activate()  # Activates the window
 
 def eProGottaGo():
     ###### PHASE 1 - GET INFO
@@ -103,7 +104,7 @@ def eProGottaGo():
             cb.copy("") # Reset clip board     
             # Find the header for Req IDs
             try:
-                ReqIDHeader = pya.locateOnScreen(f'{CurrentPath}\\{ReqIDHeaderLetter}.png') # Finds each column   
+                ReqIDHeader = pya.locateOnScreen(fr'{CurrentPath}\eProImages\{ReqIDHeaderLetter}.png',confidence=0.9) # Finds each column   
                 print("Req ID Header Found")
                 x, y = pya.center(ReqIDHeader) # Get the center of the button
             except:
@@ -116,7 +117,7 @@ def eProGottaGo():
             ###### PHASE 3 - Check for Duplicates
             # Find N/A Header
             try:
-                NAHeader = pya.locateOnScreen(f'{CurrentPath}\\{NAHeaderLetter}.png') # Finds each column   
+                NAHeader = pya.locateOnScreen(fr'{CurrentPath}\eProImages\{NAHeaderLetter}.png',confidence=0.9) # Finds each column   
                 print("N/A ID Header Found")
                 x, y = pya.center(NAHeader) # Get the center of the button
             except:
@@ -162,7 +163,7 @@ def eProGottaGo():
         time.sleep(2) # Wait for box to load
         NoMatches = ""
         try:
-            NoMatches = pya.locateOnScreen(f'{CurrentPath}\\NoMatches.png') # Tries to look for the No Matches box
+            NoMatches = pya.locateOnScreen(fr'{CurrentPath}\eProImages\NoMatches.png',confidence=0.9) # Tries to look for the No Matches box
             print(f"No SR for {ReqID}")
             time.sleep(0.5)
             keyboard.write("\n") # Enters out of the box 
