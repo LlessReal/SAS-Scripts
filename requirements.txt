@@ -2,3 +2,6 @@ tkinter
 pyperclip
 keyboard
 pyautogui
+SpeechRecognition
+pygetwindow
+tk
