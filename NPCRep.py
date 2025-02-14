@@ -19,7 +19,8 @@ import datetime
 ViewAllDeviceNames = False # Btw , if this is on the program won't go
 HearRecording = False
 TestStereo = False
-VoicelineFolderName = "Jay" # Add GoodAfternoon.wav, GoodMorning.wav, Greeting.wav (With numbers after), PleaseWait.wav, and Repeat.wav
+VoicelineFolderName = "Mickey" # Add GoodAfternoon.wav, GoodMorning.wav, Greeting.wav (With numbers after), PleaseWait.wav, and Repeat.wav
+CharacterVoiceLines = ["Laugh"]
 CustomSounds = ["Get out","I missed the part where that's my problem","Packgod Meme","Thwomp","Packgod Mickey","Never"]
 RegularInputDeviceName = "Internal Microphone (Synaptics HD Audio)" # Replace with the exact name 
 StereoInputDeviceName = "Stereo Mix (Synaptics HD Audio)" # Same Thing
@@ -39,9 +40,12 @@ CurrentPath = os.path.dirname(__file__) # Gonna need this
 model = whisper.load_model("base") # Download the model
 pygame.mixer.init() # Initialization
 
-def playSound(SoundName):
+def playCustomSound(SoundName):
     (pygame.mixer.Sound(fr"{CurrentPath}\Custom Sounds\{SoundName}.mp3")).play()
 
+def playCharacterLine(SoundName):
+    (pygame.mixer.Sound(fr"{CurrentPath}\{VoicelineFolderName}\{SoundName}.mp3")).play()
+    
 def PlayWaveFile(WavFile):
     chunk = 1024  
     wf = wave.open(WavFile, 'rb')
@@ -116,7 +120,7 @@ def AutoTransferSubmitVersion(TransferNumber):
     pya.moveTo(InitialPosition) # End
 
 def getCallerMessage(Status=""):
-    if Status == "Redo":
+    if Status == "Repeat":
         PlayVoiceLine("Repeat")
         
     recognizer = sr.Recognizer() # Initiate Recognizer
@@ -189,7 +193,7 @@ def main():
         ##### FINAL PHASE (PART 1) - Grab Info From Caller
         Status = ""
         def repeatMessage():
-            PhoneNum.set("Redo")
+            PhoneNum.set("Repeat")
             root.destroy()
         while True:
             CallersWords = getCallerMessage(Status)    
@@ -219,21 +223,31 @@ def main():
                     TransferButton.grid(row=1 + NextInLine,column=2)
                     NextInLine += 1  
 
+            CustomSoundLabel = tk.Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
+            CustomSoundLabel.grid(row=1 + NextInLine,column=1)
             for CustomSound in CustomSounds:
                 if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0:
                     NextInLine += 1 
-                CustomButton = tk.Button(root, text = CustomSound, command = lambda t=CustomSound: playSound(t)) # Seperates the numbers
-                CustomButton.grid(row=1 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
-                
+                CustomButton = tk.Button(root, text = CustomSound, command = lambda t=CustomSound: playCustomSound(t)) # Seperates the numbers
+                CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
+            CharacterVoiceLinesLabel = tk.Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
+            CharacterVoiceLinesLabel.grid(row=3 + NextInLine,column=1)
+            for CharacterVoiceLine in CharacterVoiceLines:
+                if (CharacterVoiceLines.index(CharacterVoiceLine) % 3) == 0 and CharacterVoiceLines.index(CharacterVoiceLine) != 0:
+                    NextInLine += 1 
+                CharacterVoiceLineButton = tk.Button(root, text = CharacterVoiceLine, command = lambda t=CharacterVoiceLine: playCharacterLine(t)) # Seperates the numbers
+                CharacterVoiceLineButton.grid(row=4 + NextInLine,column=(CharacterVoiceLines.index(CharacterVoiceLine) % 3))
+            WhatsYourNameButton = tk.Button(root, text = "What's your name?", command = lambda: PlayVoiceLine("Name"))
+            WhatsYourNameButton.grid(row=5 + NextInLine,column=1) # One bit over all the others    
             def repeatMessage():
                 PhoneNum.set("Repeat")
                 root.destroy()
             TransferLineToggle = tk.IntVar()
             TransferLineToggle.set(1)
             TransferVoiceLineOn = tk.Checkbutton(root, text="Play transfer line", variable=TransferLineToggle)
-            TransferVoiceLineOn.grid(row=2 + NextInLine,column=0)
-            RedoButton = tk.Button(root, text = "Redo/Ask For Clarification", command = repeatMessage)
-            RedoButton.grid(row=2 + NextInLine,column=1) # One bit over all the others
+            TransferVoiceLineOn.grid(row=6 + NextInLine,column=0)
+            RepeatButton = tk.Button(root, text = "Repeat/Ask For Clarification", command = repeatMessage)
+            RepeatButton.grid(row=6 + NextInLine,column=1) # One bit over all the others
             root.mainloop()
             Status = PhoneNum.get()
             if Status == "Repeat":
