@@ -3,5 +3,9 @@ pyperclip
 keyboard
 pyautogui
 SpeechRecognition
+sounddevice
 pygetwindow
 tk
+pyaudio
+wave
+openai=="0.28"
