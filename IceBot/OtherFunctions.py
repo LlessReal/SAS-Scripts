@@ -44,9 +44,13 @@ def getCallerMessage(Status=""):
         print("Failed to recognize audio", e)
         return ""
 
-def AutoTransferSubmitVersion(TransferNumber):
+def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
     GuiMaker.root.destroy()
-    playVoiceLine("TransferingNow")
+    if SayVoiceLine == 1:
+        playVoiceLine("TransferingNow")
+        if WaitBeforeGo == 1:
+            print("Waiting for reaction")
+            sleep(5)
     print(f"{TransferNumber} Will be sent")
     try:
         IcebarDropDownArrow = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png") # Can do directories as well btw
