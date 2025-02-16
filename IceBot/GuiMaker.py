@@ -1,19 +1,27 @@
-import tkinter as tk
 from config import CharacterVoiceLines, CustomSounds, ImportantTermDictionary 
 from SoundFunctions import playCustomSound, playCharacterLine, playVoiceLine
 import OtherFunctions
-
-def makeTransferGui(TheCallersWords):
+from OtherFunctions import OpenWindow
+from Initiation import StartFunction, RepeatPlease
+from tkinter import *
+def makeTransferGui(TheCallersWords="",Reset=True):
     global root
-    root = tk.Tk() # Creates main window
-    root.wait_visibility() # Wait until the label becomes visible
-    root.geometry("600x360") # Sets the window size
+    if Reset == False:
+        root = Tk() # Creates main window
+        root.title("IceBot Gui")
+        root.wait_visibility() # Wait until the label becomes visible
+        root.geometry("600x360") # Sets the window size
+        root.config(background="Gray")
+    else:
+        ResetGui()
+        OpenWindow("Ice Bot")
+        pass
 
     # Phone Number Label and Entry
-    PhoneNumLabel = tk.Label(root, text = 'Phone Number: ', font=('calibre',10, 'bold')) # Makes label with text Username and certain font
+    PhoneNumLabel = Label(root, text = 'Phone Number: ', font=('calibre',10, 'bold')) # Makes label with text Username and certain font
     PhoneNumLabel.grid(row=0,column=0)
-    PhoneNum = tk.StringVar() # Declares variable for storing name
-    PhoneNumEntry = tk.Entry(root, textvariable = PhoneNum, font=('calibre',10, 'bold')) # Makes entry where you can type things and stores it in TheName
+    PhoneNum = StringVar() # Declares variable for storing name
+    PhoneNumEntry = Entry(root, textvariable = PhoneNum, font=('calibre',10, 'bold')) # Makes entry where you can type things and stores it in TheName
     PhoneNumEntry.grid(row=0,column=1)
     PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get()))
     
@@ -24,53 +32,61 @@ def makeTransferGui(TheCallersWords):
         if ImportantTerm in TheCallersWords.lower():
             OfficeInMention = f"({ImportantTermDictionary[ImportantTerm][1]})" if ImportantTermDictionary[ImportantTerm][1] != "" else f"({ImportantTerm})"
             print(f"{ImportantTerm} was found in the Caller's Message. Relevant Numbers: {ImportantTermDictionary[ImportantTerm][0]} {OfficeInMention}")
-            SpecificPhoneNum = tk.Label(root, text = ImportantTermDictionary[ImportantTerm][0], font=('calibre',10, 'bold'))
+            SpecificPhoneNum = Label(root, text = ImportantTermDictionary[ImportantTerm][0], font=('calibre',10, 'bold'))
             SpecificPhoneNum.grid(row=1 + NextInLine,column=0)
-            DepartmentName = tk.Label(root, text = OfficeInMention, font=('calibre',10, 'bold'))
+            DepartmentName = Label(root, text = OfficeInMention, font=('calibre',10, 'bold'))
             DepartmentName.grid(row=1 + NextInLine,column=1)
-            TransferButton = tk.Button(root, text = "Transfer", bg="green", fg="white", command = lambda: OtherFunctions.AutoTransferSubmitVersion(SpecificPhoneNum.cget("text"),TransferLineToggle.get(),WaitToggle.get()))
+            TransferButton = Button(root, text = "Transfer", bg="green", fg="white", command = lambda: OtherFunctions.AutoTransferSubmitVersion(SpecificPhoneNum.cget("text"),TransferLineToggle.get(),WaitToggle.get()))
             TransferButton.grid(row=1 + NextInLine,column=2)
             NextInLine += 1  
 
     # Custom Sound Buttons
-    CustomSoundLabel = tk.Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
+    CustomSoundLabel = Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
     CustomSoundLabel.grid(row=1 + NextInLine,column=1)
     for CustomSound in CustomSounds:
         if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0:
             NextInLine += 1 
-        CustomButton = tk.Button(root, text = CustomSound, bg="purple", fg="white", command = lambda t=CustomSound: playCustomSound(t)) # Seperates the numbers
+        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playCustomSound(t)) # Seperates the numbers
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
     # Character Voice Lines
-    CharacterVoiceLinesLabel = tk.Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
+    CharacterVoiceLinesLabel = Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
     CharacterVoiceLinesLabel.grid(row=3 + NextInLine,column=1)
     for CharacterVoiceLine in CharacterVoiceLines:
         if (CharacterVoiceLines.index(CharacterVoiceLine) % 3) == 0 and CharacterVoiceLines.index(CharacterVoiceLine) != 0:
             NextInLine += 1 
-        CharacterVoiceLineButton = tk.Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playCharacterLine(t)) # Seperates the numbers
+        CharacterVoiceLineButton = Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playCharacterLine(t)) # Seperates the numbers
         CharacterVoiceLineButton.grid(row=4 + NextInLine,column=(CharacterVoiceLines.index(CharacterVoiceLine) % 3))
     
     # What's your name
-    WhatsYourNameButton = tk.Button(root, text = "What's your name?", bg="blue", fg="white", command = lambda: playVoiceLine("Name"))
+    WhatsYourNameButton = Button(root, text = "What's your name?", bg="blue", fg="white", command = lambda: playVoiceLine("Name"))
     WhatsYourNameButton.grid(row=5 + NextInLine,column=1) # One bit over all the others    
     
+    # Repeat/Ask For Clarification
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = RepeatPlease)
+    RepeatButton.grid(row=6 + NextInLine,column=1) # One bit over all the others
+
+    # Start Main Function
+    if Reset == False:
+        StartButton = Button(root, text = "Commence Za Program", bg="red", fg="white", command = StartFunction)
+        StartButton.grid(row=7 + NextInLine,column=1) # One bit over all the others
     # Transfer Toggle
-    TransferLineToggle = tk.IntVar()
+    TransferLineToggle = IntVar()
     TransferLineToggle.set(1)
-    TransferVoiceLineOn = tk.Checkbutton(root, text="Play transfer line", variable=TransferLineToggle)
+    TransferVoiceLineOn = Checkbutton(root, text="Play transfer line", variable=TransferLineToggle)
     TransferVoiceLineOn.grid(row=6 + NextInLine,column=0)
     
     # Wait Toggle
-    WaitToggle = tk.IntVar()
+    WaitToggle = IntVar()
     WaitToggle.set(1)
-    WaitToggleOn = tk.Checkbutton(root, text="Wait for Reaction", variable=WaitToggle)
+    WaitToggleOn = Checkbutton(root,text="Wait for Reaction",variable=WaitToggle)
     WaitToggleOn.grid(row=7 + NextInLine,column=0)
-    
-    # Repeat/Ask For Clarification
-    def repeatMessage():
-        PhoneNum.set("Repeat")
-        root.destroy()
-    RepeatButton = tk.Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = repeatMessage)
-    RepeatButton.grid(row=6 + NextInLine,column=1) # One bit over all the others
+    root.update()
+
     root.mainloop() # End
     return PhoneNum.get()
+
+# Function to clear out all widgets inside a frame
+def ResetGui():
+    for widget in root.winfo_children(): # Iterate through every widget inside the frame
+        widget.destroy() # deleting widget

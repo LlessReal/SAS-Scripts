@@ -3,54 +3,51 @@ from time import sleep
 import pygetwindow as gw
 # Selenium
 import speech_recognition as sr
-from config import model, CurrentPath 
-import GuiMaker
+from config import model, CurrentPath, RegularInputDeviceName
+import GuiMaker, os
 from SoundFunctions import playVoiceLine
-
+from Initiation import StartFunction
+# Opens Window
 def OpenWindow(WindowName):
     Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
     if Window.isMinimized: # If the window is minimized
         Window.restore() # Unminimizes it
     Window.activate()  # Activates the window
-
+# Closes Window
 def CloseWindow(WindowName):
     Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
     Window.close()  # Activates the window
 
-
-def getCallerMessage(Status=""):
-    if Status == "Repeat":
-        playVoiceLine("Repeat")
-        
+# Gets caller's message
+def getCallerMessage():   
     recognizer = sr.Recognizer() # Initiate Recognizer
     microphone = sr.Microphone() # Initiate Mic
-    with microphone as source:
+    with microphone as source: # Gets mic to listen to
         print("Now Listening to Caller.....")
-        audio = recognizer.listen(source) # Wait for customer to stop yapping
+        audio = recognizer.listen(source) # Listens to customer's yap
         print("Stopped recording")
-    try:
+    try: # Try to save their message
         with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file:
             file.write(audio.get_wav_data())
         print("Audio saved as CallersMessage.wav")
     except Exception as e:
-        print(f"Could not request results; {e}")
-    try:
+        print(f"Unable to save audio somehow {e}")
+    try: # Tries to transcribe audio
         result = model.transcribe(fr"{CurrentPath}\Caller's Message\CallersMessage.wav",fp16=False, language='English')
         with open(fr"{CurrentPath}\Caller's Message\CallersMessageTranscription.txt","w") as f:
-            f.write(result["text"])
+            f.write(result["text"]) # Put it in a transcript.txt file
         print(f"Message said was: {result["text"]}")
-        return result["text"]
+        return result["text"] # Returns the transcript for the user
     except Exception as e:
         print("Failed to recognize audio", e)
         return ""
-
+# Auto Transfer
 def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
-    GuiMaker.root.destroy()
-    if SayVoiceLine == 1:
-        playVoiceLine("TransferingNow")
-        if WaitBeforeGo == 1:
+    if SayVoiceLine == 1: # If Say Voice Line Check Box is Checked
+        playVoiceLine("TransferingNow") # Plays line
+        if WaitBeforeGo == 1: # If Wait for reaction is checked
             print("Waiting for reaction")
-            sleep(5)
+            sleep(5) # Wait for reacton
     print(f"{TransferNumber} Will be sent")
     try:
         IcebarDropDownArrow = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png") # Can do directories as well btw
@@ -58,6 +55,7 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
         pya.click(IcebarDropDownArrow) # Click the button        
     except:
         print("Ice bar is closed/missing")
+        StartFunction()
         return
 
     try:
@@ -85,3 +83,10 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
     CloseWindow("(External)") # Close the calling window   
     print("Transfer Successful!")
     pya.moveTo(InitialPosition) # End
+    # FINAL PHASE - Return to Normal
+    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')
+    print("The deed is done")
+    StartFunction()
+    OpenWindow("Ice Bot")
+    GuiMaker.makeTransferGui(Reset=True)
+    
