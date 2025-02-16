@@ -31,12 +31,12 @@ def ShowTkinterWindow():
 
 
 def AutoTransfer(TransferNumber):
-    IcebarDropDownArrow = pyautogui.locateOnScreen(fr"{CurrentPath}\IceBarImages\Icebardropdownarrow.png") # Can do directories as well btw
+    IcebarDropDownArrow = pyautogui.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png") # Can do directories as well btw
     InitialPosition = pyautogui.position()
     pyautogui.click(IcebarDropDownArrow) # Click the button        
 
     try:
-        transferbutton = pyautogui.locateOnScreen(fr"{CurrentPath}\IceBarImages\TransferButton.png") # Finds transfer button, if it's not on screen, goes to except
+        transferbutton = pyautogui.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\TransferButton.png") # Finds transfer button, if it's not on screen, goes to except
         pyautogui.click(transferbutton) # Click the button
     except:
         print("You're not in a call.") 
@@ -46,7 +46,7 @@ def AutoTransfer(TransferNumber):
     # Tries to find initiate transfer button to see if we should type info or not
     for i in range(10):
         try:
-            InitiateTransferButton = pyautogui.locateOnScreen(fr"{CurrentPath}\IceBarImages\InitiateTransferButton.png") # Checks if the 2nd window after you press transfer is up
+            InitiateTransferButton = pyautogui.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\InitiateTransferButton.png") # Checks if the 2nd window after you press transfer is up
             keyboard.write(f"{TransferNumber} \n") # Types number and then press enter
             break
         except:

@@ -1,4 +1,3 @@
-tkinter
 pyperclip
 keyboard
 pyautogui
@@ -8,4 +7,5 @@ pygetwindow
 tk
 pyaudio
 wave
-openai=="0.28"
+openai
+openai-whisper
