@@ -2,9 +2,10 @@ import os, pygame
 import sounddevice as sd
 from config import ViewAllDeviceNames, RegularInputDeviceName
 import GuiMaker 
-pygame.mixer.init() # Initialization
+
 
 def main():
+    pygame.mixer.init() # Initialization
     # Check all devices and dip
     if ViewAllDeviceNames == True:
         print(sd.query_devices())

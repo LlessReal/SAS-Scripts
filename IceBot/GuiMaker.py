@@ -1,7 +1,7 @@
 from config import CharacterVoiceLines, CustomSounds, ImportantTermDictionary 
-from SoundFunctions import playCustomSound, playCharacterLine, playVoiceLine
+from SoundFunctions import playCustomSound, playCharacterLine, playVoiceLine, StopSounds
 import OtherFunctions
-from OtherFunctions import OpenWindow
+from OtherFunctions import OpenWindow, ChangeToRegularMic, ChangeToStereoMix
 from Initiation import StartFunction, RepeatPlease
 from tkinter import *
 def makeTransferGui(TheCallersWords="",Reset=True):
@@ -46,7 +46,7 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     for CustomSound in CustomSounds:
         if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0:
             NextInLine += 1 
-        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playCustomSound(t)) # Seperates the numbers
+        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playCustomSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get())) # Seperates the numbers
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
     # Character Voice Lines
@@ -55,7 +55,7 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     for CharacterVoiceLine in CharacterVoiceLines:
         if (CharacterVoiceLines.index(CharacterVoiceLine) % 3) == 0 and CharacterVoiceLines.index(CharacterVoiceLine) != 0:
             NextInLine += 1 
-        CharacterVoiceLineButton = Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playCharacterLine(t)) # Seperates the numbers
+        CharacterVoiceLineButton = Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playCharacterLine(t,SpeedScaleVariable.get(),BrainrotModeToggle.get())) # Seperates the numbers
         CharacterVoiceLineButton.grid(row=4 + NextInLine,column=(CharacterVoiceLines.index(CharacterVoiceLine) % 3))
     
     # What's your name
@@ -68,8 +68,37 @@ def makeTransferGui(TheCallersWords="",Reset=True):
 
     # Start Main Function
     if Reset == False:
-        StartButton = Button(root, text = "Commence Za Program", bg="red", fg="white", command = StartFunction)
+        StartButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = StartFunction)
         StartButton.grid(row=7 + NextInLine,column=1) # One bit over all the others
+
+    # Stop all Sounds from playing 
+    StartButton = Button(root, text = "Stop all Sounds", bg="black", fg="white", command = StopSounds)
+    StartButton.grid(row=7 + NextInLine,column=2) # One bit over all the others
+    
+    # Speed Scale
+    SpeedScaleVariable = DoubleVar()
+    SpeedScaleVariable.set(1.0)
+    SpeedScale = Scale( root, variable = SpeedScaleVariable,  
+           from_ = 0.5, to = 2, resolution=0.01,
+           orient = HORIZONTAL) 
+    SpeedScale.grid(row=8 + NextInLine,column=1)
+    # Normalize Speed Button
+    NormalizeSpeedButton = Button( root, text="Normalize Speed", bg="purple",fg="white",command= lambda: SpeedScaleVariable.set(1.0)) 
+    NormalizeSpeedButton.grid(row=9 + NextInLine,column=1)
+    # Brainrot Mode
+    BrainrotModeToggle = IntVar()
+    BrainrotModeToggle.set(0)
+    BrainrotModeToggleBox = Checkbutton(root, text="Brainrot Mode",variable=BrainrotModeToggle) 
+    BrainrotModeToggleBox.grid(row=9 + NextInLine,column=2)
+
+    RegularMicToggle = Button( root, text="Turn on Regular Mic", bg="purple",fg="white",command= ChangeToRegularMic) 
+    RegularMicToggle.grid(row=10 + NextInLine,column=0)
+    StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",command= ChangeToStereoMix) 
+    StereoToggle.grid(row=10 + NextInLine,column=1)
+    # Refresh Button
+    #RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",Reset=Reset)) 
+    #RefreshGuiButton.grid(row=10 + NextInLine,column=1)
+
     # Transfer Toggle
     TransferLineToggle = IntVar()
     TransferLineToggle.set(1)
@@ -82,7 +111,6 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     WaitToggleOn = Checkbutton(root,text="Wait for Reaction",variable=WaitToggle)
     WaitToggleOn.grid(row=7 + NextInLine,column=0)
     root.update()
-
     root.mainloop() # End
     return PhoneNum.get()
 

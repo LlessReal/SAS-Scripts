@@ -15,9 +15,9 @@ def StartFunction():
             print("Testing Mode On. Program starts in 5 seconds")
             sleep(5)
             if not TestingStereoInput:
-                os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')
+                OtherFunctions.ChangeToRegularMic()
             else:
-                os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{StereoInputDeviceName}\" }}) | Set-AudioDevice }}"')
+                OtherFunctions.ChangeToStereoMix()
             GeneralGreeting() # Good Morning/Afternoon and then the greeting
         else: # If not testing
             # Wait for person to call
@@ -30,8 +30,7 @@ def StartFunction():
                     print("Someone is calling!") 
                     CallInactive = False # Reset CallInactive if it's True and we're past the other stae
                     pya.click(SomeoneCalling) # Clicks the button
-                    # Swap to stereo (May take a while) for bot to listen to caller
-                    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{StereoInputDeviceName}\" }}) | Set-AudioDevice }}"') 
+                    OtherFunctions.ChangeToStereoMix() # Swap to stereo (May take a while) for bot to listen to caller
                     break # Onto next stage
                 except Exception as e:
                     if CallInactive == False: # This is so it won't be spammed.
@@ -41,13 +40,11 @@ def StartFunction():
             # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
             while True: 
                 try:
-                    ReleaseAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\ReleaseAvailable.png')
-                    # Once it loads
-                    GeneralGreeting() # Good Morning/Afternoon and then the greeting
-                    # Mute myself to hear caller
+                    
                     MuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MuteAvailable.png') # Checks to see if mute option is available
-                    print("Found Mute Button!")
-                    pya.click(MuteAvailable) # Clicks mute button
+                    print("Found Mute Button! Call has started")
+                    GeneralGreeting() # After it loads, Good Morning/Afternoon and then the greeting
+                    pya.click(MuteAvailable) # Mute myself to hear caller
                     break # Break out subloop
                 except:
                     if CallInactive == False: # This is so it won't be spammed.
@@ -61,6 +58,7 @@ def StartFunction():
 def GetCallersMessage():
     CallersWords = OtherFunctions.getCallerMessage()    
     playVoiceLine("PleaseWait")
+    # FINAL PHASE: Transfering
     GuiMaker.makeTransferGui(CallersWords,True) 
 
 def RepeatPlease():

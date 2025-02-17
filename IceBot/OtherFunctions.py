@@ -3,7 +3,7 @@ from time import sleep
 import pygetwindow as gw
 # Selenium
 import speech_recognition as sr
-from config import model, CurrentPath, RegularInputDeviceName
+from config import model, CurrentPath, RegularInputDeviceName, StereoInputDeviceName
 import GuiMaker, os
 from SoundFunctions import playVoiceLine
 from Initiation import StartFunction
@@ -84,9 +84,11 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
     print("Transfer Successful!")
     pya.moveTo(InitialPosition) # End
     # FINAL PHASE - Return to Normal
-    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')
+    ChangeToRegularMic()
     print("The deed is done")
-    StartFunction()
-    OpenWindow("Ice Bot")
-    GuiMaker.makeTransferGui(Reset=True)
-    
+
+def ChangeToRegularMic():
+    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')
+
+def ChangeToStereoMix():
+    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{StereoInputDeviceName}\" }}) | Set-AudioDevice }}"')

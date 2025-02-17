@@ -2,17 +2,76 @@ import pyautogui as pya
 import os, random, wave, pyaudio, pygame, datetime
 from config import VoicelineFolderName, CurrentPath 
 # Play sound from soundboard
-def playCustomSound(SoundName):
+from pydub import AudioSegment
+import subprocess
+from pydub.playback import play
+def ChangeAudio(input_file, output_file, speed):
+    """
+    Slows down an audio file using FFmpeg without changing pitch.
+    :param input_file: Path to the input audio file.
+    :param output_file: Path to save the slowed-down audio.
+    :param speed: Playback speed (0.5 = half speed, 2.0 = double speed).
+    """
+    command = [
+        "ffmpeg", "-i", input_file, # Get the path to the file
+        "-filter:a", f"atempo={speed}",
+        "-vn", output_file
+    ]
+    subprocess.run(command, check=True,capture_output=False)
+
+# Example usage:
+
+def playCustomSound(SoundName,SpeedChange,BrainrotModeActivated):
+    input_audio = fr"{CurrentPath}\Custom Sounds\{SoundName}"
     try:
-        (pygame.mixer.Sound(fr"{CurrentPath}\Custom Sounds\{SoundName}")).play()
+        if BrainrotModeActivated == 1:
+            BrainrotSpeedSoFar = 16.0
+            for i in range(6):
+                NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
+                output_audio = fr"{CurrentPath}\Custom Sounds\{NewSoundName}"
+                ChangeAudio(input_audio, output_audio, speed=BrainrotSpeedSoFar) # Makes audio based on new slow tempo
+                BrainrotSpeedSoFar /= 2.0
+                
+            AllAlteredAudios = [x for x in os.listdir(fr"{CurrentPath}\Custom Sounds") if "Altered" in x]
+            AllAlteredAudios.sort() # Sorts em out
+            Sound1 = AudioSegment.from_mp3(fr"{CurrentPath}\Custom Sounds\{AllAlteredAudios[0]}")
+            Sound1Name = fr"{CurrentPath}\Custom Sounds\{AllAlteredAudios[0]}" # Save for later
+            AllAlteredAudios.pop(0) # Removes the file
+            for AlteredAudio in AllAlteredAudios:
+                NextSound = AudioSegment.from_mp3(fr"{CurrentPath}\Custom Sounds\{AlteredAudio}")
+                Sound1 += NextSound # need ffprobe for this to work, but add all the file together
+                os.remove(fr"{CurrentPath}\Custom Sounds\{AlteredAudio}") # Remove the files
+        
+            Sound1.export(Sound1Name, format="mp3") # Makes the new file
+            pygame.mixer.Sound(Sound1Name).play()
+            os.remove(Sound1Name)
+ 
+        elif SpeedChange != 1.0:
+            NewSoundName = SoundName.replace(".mp3"," Altered.mp3")
+            output_audio = fr"{CurrentPath}\Custom Sounds\{NewSoundName}"
+            ChangeAudio(input_audio, output_audio, speed=SpeedChange)
+            pygame.mixer.Sound(output_audio).play()
+            os.remove(output_audio)
+        else:
+            pygame.mixer.Sound(input_audio).play()
     except:
         print("No sound found. (bars)")
+
 # Play character line that's in their folder
-def playCharacterLine(SoundName):
+def playCharacterLine(SoundName, SpeedChange,BrainrotModeActivated):
+    input_audio = fr"{CurrentPath}\{VoicelineFolderName}\{SoundName}"
     try:
-        (pygame.mixer.Sound(fr"{CurrentPath}\{VoicelineFolderName}\{SoundName}")).play()
+        if SpeedChange != 1.0:
+            NewSoundName = SoundName.replace(".mp3"," Altered.mp3")
+            output_audio = fr"{CurrentPath}\{VoicelineFolderName}\{NewSoundName}"
+            ChangeAudio(input_audio, output_audio, speed=SpeedChange)
+            pygame.mixer.Sound(output_audio).play()
+            os.remove(output_audio)
+        else:
+            pygame.mixer.Sound(input_audio).play()
     except:
         print("No sound found. (bars)")
+    
 # Play a wav file
 def PlayWaveFile(WavFile):
     chunk = 1024  
@@ -44,6 +103,11 @@ def playVoiceLine(VoicelineType):
         PlayWaveFile(random.choice(AllVoicelines)) # Play a random sound from the type
     except:
         print("Voiceline wasn't found.")
+
+def StopSounds():
+    if pygame.mixer.get_busy():
+        pygame.mixer.stop()
+
 # General Greeting (Good Morning/Afternoon and Greet)
 def GeneralGreeting():
     CurrentDateandTime = datetime.datetime.now() # Gets time to determine whether Good Afternoon or Good Morning
