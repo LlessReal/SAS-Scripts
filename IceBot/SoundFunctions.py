@@ -21,26 +21,27 @@ def ChangeAudio(input_file, output_file, speed):
 
 # Example usage:
 
-def playCustomSound(SoundName,SpeedChange,BrainrotModeActivated):
-    input_audio = fr"{CurrentPath}\Custom Sounds\{SoundName}"
+def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
+    SoundFolder = "Custom Sounds" if CharacterLine == False else VoicelineFolderName
+    input_audio = fr"{CurrentPath}\{SoundFolder}\{SoundName}"
     try:
         if BrainrotModeActivated == 1:
             BrainrotSpeedSoFar = 16.0
             for i in range(6):
                 NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
-                output_audio = fr"{CurrentPath}\Custom Sounds\{NewSoundName}"
+                output_audio = fr"{CurrentPath}\{SoundFolder}\{NewSoundName}"
                 ChangeAudio(input_audio, output_audio, speed=BrainrotSpeedSoFar) # Makes audio based on new slow tempo
                 BrainrotSpeedSoFar /= 2.0
                 
-            AllAlteredAudios = [x for x in os.listdir(fr"{CurrentPath}\Custom Sounds") if "Altered" in x]
+            AllAlteredAudios = [x for x in os.listdir(fr"{CurrentPath}\{SoundFolder}") if "Altered" in x]
             AllAlteredAudios.sort() # Sorts em out
-            Sound1 = AudioSegment.from_mp3(fr"{CurrentPath}\Custom Sounds\{AllAlteredAudios[0]}")
-            Sound1Name = fr"{CurrentPath}\Custom Sounds\{AllAlteredAudios[0]}" # Save for later
+            Sound1 = AudioSegment.from_mp3(fr"{CurrentPath}\{SoundFolder}\{AllAlteredAudios[0]}")
+            Sound1Name = fr"{CurrentPath}\{SoundFolder}\{AllAlteredAudios[0]}" # Save for later
             AllAlteredAudios.pop(0) # Removes the file
             for AlteredAudio in AllAlteredAudios:
-                NextSound = AudioSegment.from_mp3(fr"{CurrentPath}\Custom Sounds\{AlteredAudio}")
+                NextSound = AudioSegment.from_mp3(fr"{CurrentPath}\{SoundFolder}\{AlteredAudio}")
                 Sound1 += NextSound # need ffprobe for this to work, but add all the file together
-                os.remove(fr"{CurrentPath}\Custom Sounds\{AlteredAudio}") # Remove the files
+                os.remove(fr"{CurrentPath}\{SoundFolder}\{AlteredAudio}") # Remove the files
         
             Sound1.export(Sound1Name, format="mp3") # Makes the new file
             pygame.mixer.Sound(Sound1Name).play()
@@ -48,22 +49,7 @@ def playCustomSound(SoundName,SpeedChange,BrainrotModeActivated):
  
         elif SpeedChange != 1.0:
             NewSoundName = SoundName.replace(".mp3"," Altered.mp3")
-            output_audio = fr"{CurrentPath}\Custom Sounds\{NewSoundName}"
-            ChangeAudio(input_audio, output_audio, speed=SpeedChange)
-            pygame.mixer.Sound(output_audio).play()
-            os.remove(output_audio)
-        else:
-            pygame.mixer.Sound(input_audio).play()
-    except:
-        print("No sound found. (bars)")
-
-# Play character line that's in their folder
-def playCharacterLine(SoundName, SpeedChange,BrainrotModeActivated):
-    input_audio = fr"{CurrentPath}\{VoicelineFolderName}\{SoundName}"
-    try:
-        if SpeedChange != 1.0:
-            NewSoundName = SoundName.replace(".mp3"," Altered.mp3")
-            output_audio = fr"{CurrentPath}\{VoicelineFolderName}\{NewSoundName}"
+            output_audio = fr"{CurrentPath}\{SoundFolder}\{NewSoundName}"
             ChangeAudio(input_audio, output_audio, speed=SpeedChange)
             pygame.mixer.Sound(output_audio).play()
             os.remove(output_audio)
@@ -91,8 +77,8 @@ def PlayWaveFile(WavFile):
 # Play voice line from character folder
 def playVoiceLine(VoicelineType):
     try:
-        UnmuteSign = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\Unmute.png")
-        pya.click(UnmuteSign)
+        UnmuteAvailable = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\UnmuteAvailable.png")
+        pya.click(UnmuteAvailable)
     except:
         pass
     AllVoicelines = [] # List Initialization
@@ -100,7 +86,11 @@ def playVoiceLine(VoicelineType):
         if VoicelineType in os.path.join(fr"{CurrentPath}\{VoicelineFolderName}", Voiceline): # If the type of voiceline is in the file name
             AllVoicelines.append(os.path.join(fr"{CurrentPath}\{VoicelineFolderName}", Voiceline)) # Add it to the list
     try:
-        PlayWaveFile(random.choice(AllVoicelines)) # Play a random sound from the type
+        RandomVoiceLineChosen = random.choice(AllVoicelines)
+        if "wav" in RandomVoiceLineChosen:
+            PlayWaveFile(random.choice(AllVoicelines)) # Play a random sound from the type
+        else:
+            pygame.mixer.Sound(RandomVoiceLineChosen).play()
     except:
         print("Voiceline wasn't found.")
 

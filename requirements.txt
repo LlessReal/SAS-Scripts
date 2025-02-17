@@ -9,3 +9,4 @@ pyaudio
 wave
 openai
 openai-whisper
+pydub

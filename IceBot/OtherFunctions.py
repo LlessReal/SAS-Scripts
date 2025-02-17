@@ -22,9 +22,24 @@ def CloseWindow(WindowName):
 def getCallerMessage():   
     recognizer = sr.Recognizer() # Initiate Recognizer
     microphone = sr.Microphone() # Initiate Mic
+    AskedtoSpeakAlready = False
     with microphone as source: # Gets mic to listen to
-        print("Now Listening to Caller.....")
-        audio = recognizer.listen(source) # Listens to customer's yap
+        while True:
+            print("Now Listening to Caller.....")
+            try:
+                audio = recognizer.listen(source, timeout=5) # Listens to customer's yap
+                AskedtoSpeakAlready = False # Reset if it was True
+                break
+            except sr.WaitTimeoutError:
+                print("No message detected.")
+                if AskedtoSpeakAlready:
+                    playVoiceLine("Goodbye") # Says good bye and closes call window
+                    CloseWindow("(External)") # Closes the call window
+                    return "Left the Call"
+                else:
+                    playVoiceLine("NoResponse")
+                    AskedtoSpeak = True
+            
         print("Stopped recording")
     try: # Try to save their message
         with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file:

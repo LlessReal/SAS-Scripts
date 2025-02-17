@@ -56,10 +56,16 @@ def StartFunction():
         GetCallersMessage()
 
 def GetCallersMessage():
-    CallersWords = OtherFunctions.getCallerMessage()    
+    CallersWords = OtherFunctions.getCallerMessage()  
+    try:
+        UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
+        pya.click(UnMuteAvailable) # Mute myself to hear caller  
+    except:
+        print("Couldn't find unmute womp womp")
     playVoiceLine("PleaseWait")
     # FINAL PHASE: Transfering
-    GuiMaker.makeTransferGui(CallersWords,True) 
+    if CallersWords != "Left the Call":
+        GuiMaker.makeTransferGui(CallersWords,True) 
 
 def RepeatPlease():
     playVoiceLine("Repeat")
