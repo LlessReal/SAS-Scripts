@@ -23,16 +23,6 @@ ImportantTermDictionary = {
 # Model name
 model = whisper.load_model("base") # Download the model
 
-""" 
-Before you use this program,
-run Install-Module -Name AudioDeviceCmdlets -Scope CurrentUser on Powershell
-This is for python to run the commands that change the input devices via commandline
-Also download ffmpeg from their site and put ffmpeg at the root folder
-Go to the ffmpeg install page, select your device, then select gyan.dev
-https://www.gyan.dev/ffmpeg/builds/
-Download it, go to bin, and copy ffmpeg.exe to the root folder
-"""
-
 # Post Config Stuff (Just ignore)
 CurrentPath = os.path.dirname(__file__)
 CustomSounds = os.listdir(fr"{CurrentPath}\Custom Sounds")

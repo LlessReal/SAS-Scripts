@@ -3,6 +3,7 @@ import os, random, wave, pyaudio, pygame, datetime
 from config import VoicelineFolderName, CurrentPath 
 # Play sound from soundboard
 from pydub import AudioSegment
+AudioSegment.converter = fr'{CurrentPath}\ffmpeg'
 import subprocess
 from pydub.playback import play
 def ChangeAudio(input_file, output_file, speed):
@@ -26,26 +27,32 @@ def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
     input_audio = fr"{CurrentPath}\{SoundFolder}\{SoundName}"
     try:
         if BrainrotModeActivated == 1:
-            BrainrotSpeedSoFar = 16.0
-            for i in range(6):
-                NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
-                output_audio = fr"{CurrentPath}\{SoundFolder}\{NewSoundName}"
-                ChangeAudio(input_audio, output_audio, speed=BrainrotSpeedSoFar) # Makes audio based on new slow tempo
-                BrainrotSpeedSoFar /= 2.0
+            BrainrotSpeedSoFar = 8.0
+            if SoundName.replace(".mp3"," Brainrot Edition.mp3") in os.listdir(fr"{CurrentPath}\Brainrot Audio Cache"):
+                Sound1Name = fr"{CurrentPath}\Brainrot Audio Cache\{SoundName}".replace(".mp3"," Brainrot Edition.mp3")
+                # Skip the making brainrot phase
+            else:
+                AllAlteredAudios = []
+                for i in range(16):
+                    if i == 0:
+                        NewSoundName = SoundName.replace(".mp3",f" Brainrot Edition.mp3")
+                    else:
+                        NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
+                    output_audio = fr"{CurrentPath}\Brainrot Audio Cache\{NewSoundName}"
+                    ChangeAudio(input_audio, output_audio, speed=BrainrotSpeedSoFar) # Makes audio based on new slow tempo
+                    BrainrotSpeedSoFar -= 0.5
+                    AllAlteredAudios.append(fr"{CurrentPath}\Brainrot Audio Cache\{NewSoundName}")
+
+                Sound1Name = AllAlteredAudios[0] 
+                Sound1 = AudioSegment.from_mp3(Sound1Name)
+                AllAlteredAudios.pop(0) # Removes the file
+                for AlteredAudio in AllAlteredAudios:
+                    NextSound = AudioSegment.from_mp3(AlteredAudio)
+                    Sound1 += NextSound # need ffprobe for this to work, but add all the file together
+                    os.remove(AlteredAudio) # Remove the files
+                Sound1.export(Sound1Name, format="mp3") # Makes the new file
                 
-            AllAlteredAudios = [x for x in os.listdir(fr"{CurrentPath}\{SoundFolder}") if "Altered" in x]
-            AllAlteredAudios.sort() # Sorts em out
-            Sound1 = AudioSegment.from_mp3(fr"{CurrentPath}\{SoundFolder}\{AllAlteredAudios[0]}")
-            Sound1Name = fr"{CurrentPath}\{SoundFolder}\{AllAlteredAudios[0]}" # Save for later
-            AllAlteredAudios.pop(0) # Removes the file
-            for AlteredAudio in AllAlteredAudios:
-                NextSound = AudioSegment.from_mp3(fr"{CurrentPath}\{SoundFolder}\{AlteredAudio}")
-                Sound1 += NextSound # need ffprobe for this to work, but add all the file together
-                os.remove(fr"{CurrentPath}\{SoundFolder}\{AlteredAudio}") # Remove the files
-        
-            Sound1.export(Sound1Name, format="mp3") # Makes the new file
             pygame.mixer.Sound(Sound1Name).play()
-            os.remove(Sound1Name)
  
         elif SpeedChange != 1.0:
             NewSoundName = SoundName.replace(".mp3"," Altered.mp3")

@@ -23,7 +23,8 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     PhoneNum = StringVar() # Declares variable for storing name
     PhoneNumEntry = Entry(root, textvariable = PhoneNum, font=('calibre',10, 'bold')) # Makes entry where you can type things and stores it in TheName
     PhoneNumEntry.grid(row=0,column=1)
-    PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get()))
+    if Reset != False:
+        PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get()))
     
     # Transfer Number, Department Name, and Transfer Button
     NextInLine = 0
@@ -65,7 +66,10 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = RepeatPlease)
+    if Reset != False:
+        RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = RepeatPlease)
+    else:
+        RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white") 
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
     
