@@ -6,7 +6,6 @@ import speech_recognition as sr
 from config import model, CurrentPath, RegularInputDeviceName, StereoInputDeviceName
 import GuiMaker, os
 from SoundFunctions import playVoiceLine
-from Initiation import StartFunction
 # Opens Window
 def OpenWindow(WindowName):
     Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
@@ -57,10 +56,13 @@ def getCallerMessage():
         print("Failed to recognize audio", e)
         return ""
 # Auto Transfer
-def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
-    if SayVoiceLine == 1: # If Say Voice Line Check Box is Checked
+def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingProgram=False):
+    if StartingProgram:
+        print("Program hasn't started yet")
+        return
+    if SayVoiceLine: # If Say Voice Line Check Box is Checked
         playVoiceLine("TransferingNow") # Plays line
-        if WaitBeforeGo == 1: # If Wait for reaction is checked
+        if WaitBeforeGo: # If Wait for reaction is checked
             print("Waiting for reaction")
             sleep(5) # Wait for reacton
     print(f"{TransferNumber} Will be sent")
@@ -70,8 +72,9 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
         pya.click(IcebarDropDownArrow) # Click the button        
     except:
         print("Ice bar is closed/missing")
-        StartFunction()
-        return
+        ResetState = GuiMaker.BackToStageOne(True)
+        if ResetState == "ResetGuiNow":
+            return
 
     try:
         transferbutton = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\TransferButton.png") # Finds transfer button, if it's not on screen, goes to except
@@ -80,7 +83,9 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo):
         print("You're not in a call.") 
         pya.click(IcebarDropDownArrow) # Clicks again to close
         pya.moveTo(InitialPosition) # Go to OG position
-        return # Ends function
+        ResetState = GuiMaker.BackToStageOne(True)
+        if ResetState == "ResetGuiNow":
+            return
     # Tries to find initiate transfer button to see if we should type info or not
     for i in range(10):
         try:

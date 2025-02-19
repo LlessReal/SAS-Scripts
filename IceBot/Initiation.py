@@ -4,20 +4,21 @@ from time import sleep
 
 import OtherFunctions
 from SoundFunctions import playVoiceLine, GeneralGreeting
-from config import ViewAllDeviceNames, RegularInputDeviceName, StereoInputDeviceName, TestingBot, TestingStereoInput, CurrentPath
+from config import CurrentPath
 import GuiMaker 
+
 pygame.mixer.init() # Initialization
 
-def StartFunction():
-    while True:
+def StartFunction(TestingBot,StartingProgram):
+    GuiMaker.makeTransferGui()
+    if not StartingProgram:
         ###### PHASE 1 - Greeting
-        if TestingBot == True: # If testing, will use regular mic, then go straight to general greeting
+        if TestingBot: # If testing, will use regular mic, then go straight to general greeting
             print("Testing Mode On. Program starts in 5 seconds")
             sleep(5)
-            if not TestingStereoInput:
-                OtherFunctions.ChangeToRegularMic()
-            else:
-                OtherFunctions.ChangeToStereoMix()
+            ResetState = GuiMaker.BackToStageOne()
+            if ResetState == "ResetGuiNow":
+                return
             GeneralGreeting() # Good Morning/Afternoon and then the greeting
         else: # If not testing
             # Wait for person to call
@@ -37,6 +38,9 @@ def StartFunction():
                         print("Waiting for Answer Button to be active....")
                     CallInactive = True # needed to not make above message spam
                     sleep(0.1)
+                    ResetState = GuiMaker.BackToStageOne()
+                    if ResetState == "ResetGuiNow":
+                        return
             # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
             while True: 
                 try:
@@ -51,6 +55,9 @@ def StartFunction():
                         print("Waiting for call to load...")
                     CallInactive = True # needed to not make above message spam
                     sleep(0.1)
+                    ResetState = GuiMaker.BackToStageOne()
+                    if ResetState == "ResetGuiNow":
+                        return
         
         ##### PHASE 2 - Grab Info From Caller
         GetCallersMessage()
@@ -61,12 +68,17 @@ def GetCallersMessage():
         UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
         pya.click(UnMuteAvailable) # Mute myself to hear caller  
     except:
-        print("Couldn't find unmute womp womp")
+        pass
     playVoiceLine("PleaseWait")
     # FINAL PHASE: Transfering
     if CallersWords != "Left the Call":
-        GuiMaker.makeTransferGui(CallersWords,True) 
+        GuiMaker.makeTransferGui(TheCallersWords=CallersWords) 
+        sleep(50)
 
-def RepeatPlease():
+# Repeat
+def RepeatPlease(StartingProgram=False):
+    if StartingProgram:
+        print("Program hasn't started yet")
+        return # Do nothing
     playVoiceLine("Repeat")
     GetCallersMessage()

@@ -1,37 +1,34 @@
 import pyautogui as pya
-import os, random, wave, pyaudio, pygame, datetime
+import os, random, wave, pyaudio, pygame, datetime, subprocess
 from config import VoicelineFolderName, CurrentPath 
 # Play sound from soundboard
 from pydub import AudioSegment
 AudioSegment.converter = fr'{CurrentPath}\ffmpeg'
-import subprocess
-from pydub.playback import play
-def ChangeAudio(input_file, output_file, speed):
+
+def ChangeAudio(input_file_path, output_file_path, speed):
     """
     Slows down an audio file using FFmpeg without changing pitch.
-    :param input_file: Path to the input audio file.
-    :param output_file: Path to save the slowed-down audio.
+    :param input_file: Path to the input audio file. output_file: Path to save the slowed-down audio.
     :param speed: Playback speed (0.5 = half speed, 2.0 = double speed).
     """
-    command = [
-        "ffmpeg", "-i", input_file, # Get the path to the file
-        "-filter:a", f"atempo={speed}",
-        "-vn", output_file
-    ]
-    subprocess.run(command, check=True,capture_output=False)
-
-# Example usage:
+    #command = [
+    #    "ffmpeg", "-i", input_file, # Get the path to the file
+    #    "-filter:a", f"atempo={speed}",
+    #3    "-vn", output_file
+    #]
+    # subprocess.run(command, check=True)
+    os.system(fr"ffmpeg -i {input_file_path} -filter:a atempo={speed} -vn {output_file_path}")
 
 def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
     SoundFolder = "Custom Sounds" if CharacterLine == False else VoicelineFolderName
     input_audio = fr"{CurrentPath}\{SoundFolder}\{SoundName}"
     try:
-        if BrainrotModeActivated == 1:
-            BrainrotSpeedSoFar = 8.0
+        if BrainrotModeActivated:
             if SoundName.replace(".mp3"," Brainrot Edition.mp3") in os.listdir(fr"{CurrentPath}\Brainrot Audio Cache"):
                 Sound1Name = fr"{CurrentPath}\Brainrot Audio Cache\{SoundName}".replace(".mp3"," Brainrot Edition.mp3")
                 # Skip the making brainrot phase
             else:
+                BrainrotSpeedSoFar = 8.0
                 AllAlteredAudios = []
                 for i in range(16):
                     if i == 0:

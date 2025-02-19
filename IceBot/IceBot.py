@@ -3,15 +3,14 @@ import sounddevice as sd
 from config import ViewAllDeviceNames, RegularInputDeviceName
 import GuiMaker 
 
-
 def main():
     pygame.mixer.init() # Initialization
-    # Check all devices and dip
+    # Check all devices and dips
     if ViewAllDeviceNames == True:
         print(sd.query_devices())
         print("Performed Input Device Listing")
         return # The rest of the function won't run
-    GuiMaker.makeTransferGui(Reset=False) 
+    GuiMaker.makeTransferGui(Reset=False,StartingProgram=True) 
 
 if __name__ == '__main__':
     try:

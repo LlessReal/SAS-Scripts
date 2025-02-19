@@ -1,20 +1,21 @@
-from config import CharacterVoiceLines, CustomSounds, ImportantTermDictionary 
+from config import VoicelineFolderName, ImportantTermDictionary, CurrentPath
 from SoundFunctions import playSound, playVoiceLine, StopSounds
 import OtherFunctions
 from OtherFunctions import OpenWindow, ChangeToRegularMic, ChangeToStereoMix
 from Initiation import StartFunction, RepeatPlease
 from tkinter import *
-def makeTransferGui(TheCallersWords="",Reset=True):
-    global root
-    if Reset == False:
-        root = Tk() # Creates main window
-        root.title("IceBot Gui")
-        root.wait_visibility() # Wait until the label becomes visible
-        root.geometry("600x360") # Sets the window size
-        root.config(background="Gray")
-    else:
+import os, threading
+
+root = Tk() # Creates main window
+root.title("IceBot Gui")
+root.wait_visibility() # Wait until the label becomes visible
+root.geometry("600x360") # Sets the window size
+root.config(background="Gray")
+StopSetting = IntVar()
+def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
+    if Reset == True:
         ResetGui()
-        OpenWindow("Ice Bot")
+        OpenWindow("IceBot Gui")
         pass
 
     # Phone Number Label and Entry
@@ -22,9 +23,8 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     PhoneNumLabel.grid(row=0,column=0)
     PhoneNum = StringVar() # Declares variable for storing name
     PhoneNumEntry = Entry(root, textvariable = PhoneNum, font=('calibre',10, 'bold')) # Makes entry where you can type things and stores it in TheName
-    PhoneNumEntry.grid(row=0,column=1)
-    if Reset != False:
-        PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get()))
+    PhoneNumEntry.grid(row=0,column=1)    
+    PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get(),StartingProgram=StartingProgram))
     
     # Transfer Number, Department Name, and Transfer Button
     NextInLine = 0
@@ -42,6 +42,7 @@ def makeTransferGui(TheCallersWords="",Reset=True):
             NextInLine += 1  
 
     # Custom Sound Buttons
+    CustomSounds = os.listdir(fr"{CurrentPath}\Custom Sounds")
     CustomSoundLabel = Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
     CustomSoundLabel.grid(row=1 + NextInLine,column=1)
     for CustomSound in CustomSounds:
@@ -51,6 +52,9 @@ def makeTransferGui(TheCallersWords="",Reset=True):
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
     # Character Voice Lines
+    # Building the character voice lines list
+    CharacterVoiceLines = [CharacterVoiceLine for CharacterVoiceLine in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}") if "mp3" in CharacterVoiceLine]
+    # Makes a new list with only files that have "mp3" in it
     CharacterVoiceLinesLabel = Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
     CharacterVoiceLinesLabel.grid(row=3 + NextInLine,column=1)
     for CharacterVoiceLine in CharacterVoiceLines:
@@ -66,14 +70,9 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    if Reset != False:
-        RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = RepeatPlease)
-    else:
-        RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white") 
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = lambda: RepeatPlease(StartingProgram=StartingProgram))
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
-    
-    
     # Wait Toggle
     WaitToggle = IntVar()
     WaitToggle.set(1)
@@ -81,13 +80,19 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     WaitToggleOn.grid(row=6 + NextInLine,column=0)
 
     # Start Main Function
-    if Reset == False:
-        StartButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = StartFunction)
-        StartButton.grid(row=6 + NextInLine,column=1) # One bit over all the others
-
+    #if StartingProgram:
+    if not StartingProgram:
+        StartProgramButton = Button(root, text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")]) 
+    else:
+        StartProgramButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = lambda: [StopSetting.set(0),InitiationThread.start(),StartProgramButton.config(text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")])]) 
+    StartProgramButton.grid(row=6 + NextInLine,column=1) # One bit over all the other
+    #else:
+    #    StopProgramButton = Button(root, text = "Stop Program", bg="orange", fg="white", command = lambda: [StopSetting.set(1),StopProgramButton.config(text="Stopping Program...",bg="red",state="disabled")])
+    #    StopProgramButton.grid(row=6 + NextInLine,column=1) # One bit over all the others    
+    
     # Stop all Sounds from playing 
-    StartButton = Button(root, text = "Stop all Sounds", bg="black", fg="white", command = StopSounds)
-    StartButton.grid(row=6 + NextInLine,column=2) # One bit over all the others
+    StopAllSoundsButton = Button(root, text = "Stop all Sounds", bg="black", fg="white", command = StopSounds)
+    StopAllSoundsButton.grid(row=6 + NextInLine,column=2) # One bit over all the others
     
     # Speed Scale
     SpeedScaleVariable = DoubleVar()
@@ -100,26 +105,48 @@ def makeTransferGui(TheCallersWords="",Reset=True):
     NormalizeSpeedButton = Button( root, text="Normalize Speed", bg="purple",fg="white",command= lambda: SpeedScaleVariable.set(1.0)) 
     NormalizeSpeedButton.grid(row=8 + NextInLine,column=1)
 
-    
     # Brainrot Mode
     BrainrotModeToggle = IntVar()
     BrainrotModeToggle.set(0)
     BrainrotModeToggleBox = Checkbutton(root, text="Brainrot Mode",variable=BrainrotModeToggle) 
     BrainrotModeToggleBox.grid(row=8 + NextInLine,column=2)
-
+    
+    # Regular Mic Toggle Button
     RegularMicToggle = Button( root, text="Turn on Regular Mic", bg="purple",fg="white",command= ChangeToRegularMic) 
     RegularMicToggle.grid(row=9 + NextInLine,column=0)
+    # Stereo Mix Toggle Button
     StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",command= ChangeToStereoMix) 
     StereoToggle.grid(row=9 + NextInLine,column=1)
+
+    # Testing Bot Mode
+    TestingBotToggle = IntVar()
+    if StartingProgram:
+        TestingBotToggle.set(0)
+    TestingBotToggleBox = Checkbutton(root, text="Testing Bot",variable=TestingBotToggle,state= "disabled" if not StartingProgram else "normal") 
+    TestingBotToggleBox.grid(row=9 + NextInLine,column=2)
+    global InitiationThread
+    InitiationThread = threading.Thread(target=lambda: StartFunction(TestingBotToggle.get(),StartingProgram=False))
+   
     # Refresh Button
-    #RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",Reset=Reset)) 
-    #RefreshGuiButton.grid(row=10 + NextInLine,column=1)
+    RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 
+    RefreshGuiButton.grid(row=10 + NextInLine,column=1)
 
     root.update()
-    root.mainloop() # End
+    if StartingProgram and StopSetting.get() != 1:
+        root.mainloop() # End
     return PhoneNum.get()
 
 # Function to clear out all widgets inside a frame
 def ResetGui():
     for widget in root.winfo_children(): # Iterate through every widget inside the frame
         widget.destroy() # deleting widget
+
+def BackToStageOne(AfterTransfer=False):
+    if StopSetting.get() == 0:
+        if AfterTransfer:
+            InitiationThread.start()
+        return
+    else:
+        print("Time ta head out")
+        makeTransferGui(StartingProgram=True)
+        return "ResetGuiNow"
