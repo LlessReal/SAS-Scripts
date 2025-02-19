@@ -1,6 +1,6 @@
 import os, pygame
 import sounddevice as sd
-from config import ViewAllDeviceNames, RegularInputDeviceName
+from config import ViewAllDeviceNames
 import GuiMaker 
 
 def main():
@@ -18,4 +18,3 @@ if __name__ == '__main__':
     except Exception as e:
         print("The program broke L", e) # Self-Explanatory
         # Below sets input device back to regular mic
-        os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')

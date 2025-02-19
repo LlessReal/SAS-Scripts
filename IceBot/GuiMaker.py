@@ -1,8 +1,9 @@
 from config import VoicelineFolderName, ImportantTermDictionary, CurrentPath
 from SoundFunctions import playSound, playVoiceLine, StopSounds
-import OtherFunctions
-from OtherFunctions import OpenWindow, ChangeToRegularMic, ChangeToStereoMix
+from OtherFunctions import OpenWindow
+from Initiation import MTeamsChangeInputDevice
 from Initiation import StartFunction, RepeatPlease
+from IceBarFunctions import AutoTransferSubmitVersion
 from tkinter import *
 import os, threading
 
@@ -24,7 +25,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     PhoneNum = StringVar() # Declares variable for storing name
     PhoneNumEntry = Entry(root, textvariable = PhoneNum, font=('calibre',10, 'bold')) # Makes entry where you can type things and stores it in TheName
     PhoneNumEntry.grid(row=0,column=1)    
-    PhoneNumEntry.bind("<Return>", lambda event: OtherFunctions.AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get(),StartingProgram=StartingProgram))
+    PhoneNumEntry.bind("<Return>", lambda event: AutoTransferSubmitVersion(PhoneNumEntry.get(),TransferLineToggle.get(),WaitToggle.get(),StartingProgram=StartingProgram))
     
     # Transfer Number, Department Name, and Transfer Button
     NextInLine = 0
@@ -37,7 +38,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
             SpecificPhoneNum.grid(row=1 + NextInLine,column=0)
             DepartmentName = Label(root, text = OfficeInMention, font=('calibre',10, 'bold'))
             DepartmentName.grid(row=1 + NextInLine,column=1)
-            TransferButton = Button(root, text = "Transfer", bg="green", fg="white", command = lambda: OtherFunctions.AutoTransferSubmitVersion(SpecificPhoneNum.cget("text"),TransferLineToggle.get(),WaitToggle.get()))
+            TransferButton = Button(root, text = "Transfer", bg="green", fg="white", command = lambda: AutoTransferSubmitVersion(SpecificPhoneNum.cget("text"),TransferLineToggle.get(),WaitToggle.get()))
             TransferButton.grid(row=1 + NextInLine,column=2)
             NextInLine += 1  
 
@@ -70,7 +71,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", command = lambda: RepeatPlease(StartingProgram=StartingProgram))
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease())
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
     # Wait Toggle
@@ -82,7 +83,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     # Start Main Function
     #if StartingProgram:
     if not StartingProgram:
-        StartProgramButton = Button(root, text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")]) 
+        StartProgramButton = Button(root, text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),BackToStageOne(),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")]) 
     else:
         StartProgramButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = lambda: [StopSetting.set(0),InitiationThread.start(),StartProgramButton.config(text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")])]) 
     StartProgramButton.grid(row=6 + NextInLine,column=1) # One bit over all the other
@@ -110,14 +111,13 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     BrainrotModeToggle.set(0)
     BrainrotModeToggleBox = Checkbutton(root, text="Brainrot Mode",variable=BrainrotModeToggle) 
     BrainrotModeToggleBox.grid(row=8 + NextInLine,column=2)
-    
-    # Regular Mic Toggle Button
-    RegularMicToggle = Button( root, text="Turn on Regular Mic", bg="purple",fg="white",command= ChangeToRegularMic) 
-    RegularMicToggle.grid(row=9 + NextInLine,column=0)
-    # Stereo Mix Toggle Button
-    StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",command= ChangeToStereoMix) 
-    StereoToggle.grid(row=9 + NextInLine,column=1)
 
+    # Regular Mic Toggle Button
+    HeadsetToggle = Button( root, text="Activate Headset", bg="purple",fg="white",command= lambda: MTeamsChangeInputDevice("Headset")) 
+    HeadsetToggle.grid(row=9 + NextInLine,column=0)
+    # Stereo Mix Toggle Button
+    SpeakersToggle = Button( root, text="Activate Speakers", bg="purple",fg="white",command= lambda:  MTeamsChangeInputDevice("Speakers")) 
+    SpeakersToggle.grid(row=9 + NextInLine,column=1)
     # Testing Bot Mode
     TestingBotToggle = IntVar()
     if StartingProgram:

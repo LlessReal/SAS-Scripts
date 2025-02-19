@@ -8,5 +8,6 @@ tk
 pyaudio
 wave
 openai
-openai-whisper
 pydub
+ollama
+pyttsx3

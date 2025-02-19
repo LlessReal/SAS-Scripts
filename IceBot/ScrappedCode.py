@@ -1,3 +1,4 @@
+import os
 # Formerly, if brainrot mode was on itwould play all the files created before deleting them, but then i found i way to sorta add em together sooooo
 if BrainrotModeActivated == 1: # No for now lol
     BrainrotSpeedSoFar = 8
@@ -14,3 +15,20 @@ if BrainrotModeActivated == 1: # No for now lol
         os.remove(fr"{CurrentPath}\Custom Sounds\{AlteredAudio}")
         while SoundPlaying.get_busy():
             pass     
+
+# Apparently changing the system settings don't affect microsoft's settings sooo good bye !!
+RegularInputDeviceName = "Internal Microphone (Synaptics HD Audio)" # Replace with the exact name | Saves: Microphone (Realtek(R) Audio), Internal Microphone (Synaptics HD Audio)
+StereoInputDeviceName = "Stereo Mix (Synaptics HD Audio)" # Same Thing | Saves: Stereo Mix (Synaptics HD Audio)
+
+def ChangeToRegularMic():
+    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{RegularInputDeviceName}\" }}) | Set-AudioDevice }}"')
+
+def ChangeToStereoMix():
+    os.system(fr'powershell -Command "& {{(Get-AudioDevice -List | Where-Object {{ $_.Name -like \"{StereoInputDeviceName}\" }}) | Set-AudioDevice }}"')
+# Gui Maker
+# Regular Mic Toggle Button
+RegularMicToggle = Button( root, text="Turn on Regular Mic", bg="purple",fg="white",command= ChangeToRegularMic) 
+RegularMicToggle.grid(row=9 + NextInLine,column=0)
+# Stereo Mix Toggle Button
+StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",command= ChangeToStereoMix) 
+StereoToggle.grid(row=9 + NextInLine,column=1)

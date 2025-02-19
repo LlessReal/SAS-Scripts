@@ -1,13 +1,13 @@
 import pyautogui as pya
-import os, pygame
+import ollama, pyttsx3
 from time import sleep
 
 import OtherFunctions
+from OtherFunctions import OpenWindow
 from SoundFunctions import playVoiceLine, GeneralGreeting
 from config import CurrentPath
 import GuiMaker 
-
-pygame.mixer.init() # Initialization
+engine = pyttsx3.init() # Initialize the engine
 
 def StartFunction(TestingBot,StartingProgram):
     GuiMaker.makeTransferGui()
@@ -31,7 +31,6 @@ def StartFunction(TestingBot,StartingProgram):
                     print("Someone is calling!") 
                     CallInactive = False # Reset CallInactive if it's True and we're past the other stae
                     pya.click(SomeoneCalling) # Clicks the button
-                    OtherFunctions.ChangeToStereoMix() # Swap to stereo (May take a while) for bot to listen to caller
                     break # Onto next stage
                 except Exception as e:
                     if CallInactive == False: # This is so it won't be spammed.
@@ -44,11 +43,20 @@ def StartFunction(TestingBot,StartingProgram):
             # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
             while True: 
                 try:
-                    
-                    MuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MuteAvailable.png') # Checks to see if mute option is available
-                    print("Found Mute Button! Call has started")
+                    CallStartedImages = [fr'{CurrentPath}\..\IceBarImages\MuteAvailable.png',fr'{CurrentPath}\..\IceBarImages\PersonIcon.png']
+                    NoCallStarted = True
+                    for CallStartedImage in CallStartedImages:
+                        try:
+                            MuteAvailable = pya.locateOnScreen(CallStartedImage) # Checks to see if mute option is available
+                            NoCallStarted = False
+                            break
+                        except:
+                            continue
+                    if NoCallStarted:
+                        continue
+                    print("Call has started !!")
                     GeneralGreeting() # After it loads, Good Morning/Afternoon and then the greeting
-                    pya.click(MuteAvailable) # Mute myself to hear caller
+                    MTeamsChangeInputDevice("Headset")
                     break # Break out subloop
                 except:
                     if CallInactive == False: # This is so it won't be spammed.
@@ -67,13 +75,40 @@ def GetCallersMessage():
     try:
         UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
         pya.click(UnMuteAvailable) # Mute myself to hear caller  
+        MTeamsChangeInputDevice("Speakers")
     except:
         pass
     playVoiceLine("PleaseWait")
+    #model_name = "sblight"  # Replace with your desired Ollama model
+    #TranscriptionText = fr"{CurrentPath}\Caller's Message\CallersMessageTranscription.txt"
+    #EntireConversation = fr"{CurrentPath}\Caller's Message\WholeConvo.txt"
+    #try:
+    #    response = ollama.chat(model=model_name, messages=[{'role': 'user', 'content': CallersWords}])
+    #    BotsResponse = response['message']['content'] # Use this for whatever
+    #except Exception as e:
+    #    print(f"Error running Ollama: {e}")
+    #    return
+
+    # Adjust speaking rate
+    #rate = engine.getProperty('rate')
+    #engine.setProperty('rate', 100) # Slowwww
+
+    # Adjust volume
+    #volume = engine.getProperty('volume')
+    #engine.setProperty('volume', 1.0)
+
+    # Change voice
+    #voices = engine.getProperty('voices')
+    #engine.setProperty('voice', voices[0].id)  # Selecting a female voice
+
+    #engine.say(BotsResponse) # Says the bot's response
+    #engine.runAndWait()
+
+    #engine.stop() # Stop the engine
     # FINAL PHASE: Transfering
     if CallersWords != "Left the Call":
         GuiMaker.makeTransferGui(TheCallersWords=CallersWords) 
-        sleep(50)
+     
 
 # Repeat
 def RepeatPlease(StartingProgram=False):
@@ -82,3 +117,28 @@ def RepeatPlease(StartingProgram=False):
         return # Do nothing
     playVoiceLine("Repeat")
     GetCallersMessage()
+
+def MTeamsChangeInputDevice(Input):
+    try:
+        OpenWindow("(External)")
+    except:
+        print("Not in a call")
+        return
+    sleep(0.5)
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown)
+    except:
+        print("Couldn't find Microsoft Dropdown :(")
+        return
+    sleep(0.5)
+    try:
+        if Input == "Headset":
+            HDAudio = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\HDAudio.png')
+            pya.click(HDAudio)
+        elif Input == "Speakers":
+            Speakers = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\Speakers.png')
+            pya.click(Speakers)
+    except:
+        print("Couldn't find headset or speakers : (")
+        return
