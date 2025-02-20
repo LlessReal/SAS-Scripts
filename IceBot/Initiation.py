@@ -2,12 +2,23 @@ import pyautogui as pya
 import ollama, pyttsx3
 from time import sleep
 
-import OtherFunctions
+import IceBarFunctions
 from OtherFunctions import OpenWindow
-from SoundFunctions import playVoiceLine, GeneralGreeting
-from config import CurrentPath
+from config import CurrentPath, ModelName
 import GuiMaker 
+import SoundFunctions
 engine = pyttsx3.init() # Initialize the engine
+#Adjust speaking rate
+rate = engine.getProperty('rate')
+engine.setProperty('rate', 150) # Slowwww
+
+#Adjust volume
+engine.setProperty('volume', 1.0)
+
+#Change voice
+voices = engine.getProperty('voices')
+engine.setProperty('voice', voices[0].id)  # Selecting a female voice
+
 
 def StartFunction(TestingBot,StartingProgram):
     GuiMaker.makeTransferGui()
@@ -19,7 +30,7 @@ def StartFunction(TestingBot,StartingProgram):
             ResetState = GuiMaker.BackToStageOne()
             if ResetState == "ResetGuiNow":
                 return
-            GeneralGreeting() # Good Morning/Afternoon and then the greeting
+            SoundFunctions.GeneralGreeting() # Good Morning/Afternoon and then the greeting
         else: # If not testing
             # Wait for person to call
             CallInactive = False # Apart of message showing functionality to not have wait message spammedCallInactive = False # Apart of message showing functionality to not have wait message spammed
@@ -55,8 +66,7 @@ def StartFunction(TestingBot,StartingProgram):
                     if NoCallStarted:
                         continue
                     print("Call has started !!")
-                    GeneralGreeting() # After it loads, Good Morning/Afternoon and then the greeting
-                    MTeamsChangeInputDevice("Headset")
+                    SoundFunctions.GeneralGreeting() # After it loads, Good Morning/Afternoon and then the greeting
                     break # Break out subloop
                 except:
                     if CallInactive == False: # This is so it won't be spammed.
@@ -71,60 +81,48 @@ def StartFunction(TestingBot,StartingProgram):
         GetCallersMessage()
 
 def GetCallersMessage():
-    CallersWords = OtherFunctions.getCallerMessage()  
+    CallersWords = IceBarFunctions.getCallerMessage() 
+    DetailsExplained = f"""An unknown caller has sent this message towards you: {CallersWords}
+Respond to the caller's message, and if you're going to transfer them to a number, say, '[INITIATE TRANSFER - (The Number )]' AT THE VERY END of your response, and replace (The Number) with the actual number you're transfering them to of course."""
+    DetailsLocation = fr"{CurrentPath}\Details.txt"
+    with open(DetailsLocation,"r+", encoding='utf-8', errors='ignore') as f:
+        DetailsandMessage = f"{DetailsExplained}\n{f.read()}" 
+
+    SoundFunctions.playVoiceLine("PleaseWait")
+    # Generate bot's response
     try:
-        UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
-        pya.click(UnMuteAvailable) # Mute myself to hear caller  
-        MTeamsChangeInputDevice("Speakers")
-    except:
-        pass
-    playVoiceLine("PleaseWait")
-    #model_name = "sblight"  # Replace with your desired Ollama model
-    #TranscriptionText = fr"{CurrentPath}\Caller's Message\CallersMessageTranscription.txt"
-    #EntireConversation = fr"{CurrentPath}\Caller's Message\WholeConvo.txt"
-    #try:
-    #    response = ollama.chat(model=model_name, messages=[{'role': 'user', 'content': CallersWords}])
-    #    BotsResponse = response['message']['content'] # Use this for whatever
-    #except Exception as e:
-    #    print(f"Error running Ollama: {e}")
-    #    return
-
-    # Adjust speaking rate
-    #rate = engine.getProperty('rate')
-    #engine.setProperty('rate', 100) # Slowwww
-
-    # Adjust volume
-    #volume = engine.getProperty('volume')
-    #engine.setProperty('volume', 1.0)
-
-    # Change voice
-    #voices = engine.getProperty('voices')
-    #engine.setProperty('voice', voices[0].id)  # Selecting a female voice
-
-    #engine.say(BotsResponse) # Says the bot's response
-    #engine.runAndWait()
-
-    #engine.stop() # Stop the engine
+        response = ollama.chat(model=ModelName, messages=[{'role': 'user', 'content': DetailsandMessage}])
+        BotsResponse = response['message']['content'] # Use this for whatever
+    except Exception as e:
+        print(f"Error running Ollama: {e}")
+        return
+    
+    print(f"Bot's Response: {BotsResponse}")
+    engine.say(BotsResponse) # Says the bot's response
+    engine.runAndWait()
+    engine.stop() # Stop the engine
     # FINAL PHASE: Transfering
     if CallersWords != "Left the Call":
-        GuiMaker.makeTransferGui(TheCallersWords=CallersWords) 
-     
+        GuiMaker.makeTransferGui(TheCallersWords=CallersWords,BotsResponse=BotsResponse) 
 
 # Repeat
-def RepeatPlease(StartingProgram=False):
+def RepeatPlease(StartingProgram=False,SayMessage=0):
     if StartingProgram:
         print("Program hasn't started yet")
         return # Do nothing
-    playVoiceLine("Repeat")
+    if SayMessage == 1:
+        SoundFunctions.playVoiceLine("Repeat")
     GetCallersMessage()
 
+# Change the Input Device on Microsoft Teams Call
 def MTeamsChangeInputDevice(Input):
+    # Open the call window
     try:
         OpenWindow("(External)")
     except:
-        print("Not in a call")
         return
     sleep(0.5)
+    # Click the dropdown
     try:
         MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
         pya.click(MicrosoftDropDown)
@@ -132,13 +130,15 @@ def MTeamsChangeInputDevice(Input):
         print("Couldn't find Microsoft Dropdown :(")
         return
     sleep(0.5)
+    # Click Headset, or Speakers, or Stereo Yk Yk
     try:
         if Input == "Headset":
-            HDAudio = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\HDAudio.png')
-            pya.click(HDAudio)
+            DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\HDAudio.png')
         elif Input == "Speakers":
-            Speakers = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\Speakers.png')
-            pya.click(Speakers)
+            DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\Speakers.png')
+        elif Input == "StereoMix":
+            DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\StereoMix.png')
+        pya.click(DeviceToTurnOn)
     except:
         print("Couldn't find headset or speakers : (")
         return

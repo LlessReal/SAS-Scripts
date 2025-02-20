@@ -1,9 +1,10 @@
 import pyautogui as pya
 import os, random, wave, pyaudio, pygame, datetime, subprocess
 from config import VoicelineFolderName, CurrentPath 
-# Play sound from soundboard
-from pydub import AudioSegment
-AudioSegment.converter = fr'{CurrentPath}\ffmpeg'
+from pydub import AudioSegment # Play sound from soundboard
+from Initiation import MTeamsChangeInputDevice
+AudioSegment.converter = fr'{CurrentPath}\ffmpeg' # Change audio speed thing yeaaaaaa
+
 
 def ChangeAudio(input_file_path, output_file_path, speed):
     """
@@ -11,12 +12,6 @@ def ChangeAudio(input_file_path, output_file_path, speed):
     :param input_file: Path to the input audio file. output_file: Path to save the slowed-down audio.
     :param speed: Playback speed (0.5 = half speed, 2.0 = double speed).
     """
-    #command = [
-    #    "ffmpeg", "-i", input_file, # Get the path to the file
-    #    "-filter:a", f"atempo={speed}",
-    #3    "-vn", output_file
-    #]
-    # subprocess.run(command, check=True)
     os.system(fr"ffmpeg -i {input_file_path} -filter:a atempo={speed} -vn {output_file_path}")
 
 def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
@@ -62,7 +57,7 @@ def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
     except:
         print("No sound found. (bars)")
     
-# Play a wav file
+# Play a wav file instead of an mp3 file
 def PlayWaveFile(WavFile):
     chunk = 1024  
     wf = wave.open(WavFile, 'rb')
@@ -78,13 +73,20 @@ def PlayWaveFile(WavFile):
     stream.stop_stream() # Stop receiving data
     stream.close() # Close Stream
     p.terminate()
+
+
 # Play voice line from character folder
 def playVoiceLine(VoicelineType):
     try:
-        UnmuteAvailable = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\UnmuteAvailable.png")
-        pya.click(UnmuteAvailable)
+        UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
+        pya.click(UnMuteAvailable) # Unmute myself to hear caller  
     except:
         pass
+    try:
+        MTeamsChangeInputDevice("Speakers")
+    except:
+        pass
+
     AllVoicelines = [] # List Initialization
     for Voiceline in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}"): # Gets all files in the Voiceliens folder
         if VoicelineType in os.path.join(fr"{CurrentPath}\{VoicelineFolderName}", Voiceline): # If the type of voiceline is in the file name
@@ -92,18 +94,23 @@ def playVoiceLine(VoicelineType):
     try:
         RandomVoiceLineChosen = random.choice(AllVoicelines)
         if "wav" in RandomVoiceLineChosen:
-            PlayWaveFile(random.choice(AllVoicelines)) # Play a random sound from the type
+            PlayWaveFile(random.choice(AllVoicelines))
         else:
             pygame.mixer.Sound(RandomVoiceLineChosen).play()
     except:
         print("Voiceline wasn't found.")
 
+
+# Function that will stop all sounds from playing
 def StopSounds():
-    if pygame.mixer.get_busy():
-        pygame.mixer.stop()
+    if pygame.mixer.get_busy(): # If sounds are playing
+        pygame.mixer.stop() # Stop za sounds >: (
+
 
 # General Greeting (Good Morning/Afternoon and Greet)
 def GeneralGreeting():
+    MTeamsChangeInputDevice("StereoMix") # Switches to Stereo Mix on Microsoft Teams
     CurrentDateandTime = datetime.datetime.now() # Gets time to determine whether Good Afternoon or Good Morning
     playVoiceLine("GoodMorning" if CurrentDateandTime.strftime("%p") == "AM" else "GoodAfternoon")
     playVoiceLine("Greeting")
+    MTeamsChangeInputDevice("Headset")

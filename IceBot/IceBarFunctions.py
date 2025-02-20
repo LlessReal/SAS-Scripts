@@ -1,75 +1,124 @@
 import pyautogui as pya
 import GuiMaker
 from time import sleep
-from config import CurrentPath
-from SoundFunctions import playVoiceLine
 from OtherFunctions import CloseWindow
+# Selenium
+import speech_recognition as sr
+from config import model, CurrentPath
+import SoundFunctions
 
-def PressIceButton(ImagePath,FailMessage):
+# Function to press a button on IceBar (other than the drop down)
+def PressIceButton(ImagePath,WaitMessage="",FailMessage="",TypeTransfer=False,TransferNumber=0,Wait=False):
     AlreadyTried = False 
     Timeout = 0   
     while True:
         try:
-            transferbutton = pya.locateOnScreen(ImagePath) # Finds transfer button, if it's not on screen, goes to except
-            pya.click(transferbutton) # Click the button
+            ButtonToBePressed = pya.locateOnScreen(ImagePath) # Finds transfer button, if it's not on screen, goes to except
+            if TypeTransfer == False:
+                pya.click(ButtonToBePressed) # Click the button
+            else:
+                pya.write(f"{TransferNumber} \n") # Types number and then press enter
+            sleep(1)
             return
         except:
-            if AlreadyTried == False:
+            if Wait == True:
+                if AlreadyTried == False:
+                    print(WaitMessage)
+                    AlreadyTried = True
+                sleep(0.1)
+                Timeout += 1
+            if Timeout == 100 or Wait == False:
                 print(FailMessage) 
-                AlreadyTried = True
-            
-            ResetState = GuiMaker.BackToStageOne(True)
-            if ResetState == "ResetGuiNow":
-                return
-            sleep(0.1)
-            Timeout += 1
-            if Timeout == 100:
                 return "Fail"
             continue 
 
-# Auto Transfer
+
+# Function that transfers the users
 def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingProgram=False):
     if StartingProgram:
         print("Program hasn't started yet")
         return
     if SayVoiceLine: # If Say Voice Line Check Box is Checked
-        playVoiceLine("TransferingNow") # Plays line
+        SoundFunctions.playVoiceLine("TransferingNow") # Plays line
         if WaitBeforeGo: # If Wait for reaction is checked
             print("Waiting for reaction")
             sleep(5) # Wait for reacton
-    print(f"{TransferNumber} Will be sent")
-    try:
-        IcebarDropDownArrow = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png") # Can do directories as well btw
-        InitialPosition = pya.position()
-        pya.click(IcebarDropDownArrow) # Click the button        
-    except:
-        print("Ice bar is closed/missing")
-        ResetState = GuiMaker.BackToStageOne(True)
-        return
-    sleep(1)
-    MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\TransferButton.png","You're not in a call.")   
-    if MoveOnStatus == "Fail":
-        pya.click(IcebarDropDownArrow) # Clicks again to close
-        pya.moveTo(InitialPosition) # Go to OG position
-        return
+    print(f"{TransferNumber} is attempting to be sent")
+    # Save OG Position
+    InitialPosition = pya.position()
+    # Tries to press the dropdown
+    MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png",FailMessage="Ice bar is closed/missing") 
+    if MoveOnStatus != "Fail":
+        # Pressing Transfer Button Next
+        MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\TransferButton.png",FailMessage="You're not in a call.")   
+        if MoveOnStatus != "Fail":
+            # If we should type transfer next
+            MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\InitiateTransferButton.png",WaitMessage="Waiting for Transfer Initiation to load..",FailMessage="Failed operation. PC too laggy",TypeTransfer=True,TransferNumber=TransferNumber) 
+    
+    if MoveOnStatus != "Fail": 
+        CloseWindow("(External)") # Close the calling window   
+        print("Transfer Successful!")
+    print("Returning to initial stage")
+    pya.moveTo(InitialPosition) # # Go to OG position
+    ResetState = GuiMaker.BackToStageOne(True)
 
-    # Tries to find initiate transfer button to see if we should type info or not
-    for i in range(99):
-        try:
-            InitiateTransferButton = pya.locateOnScreen(fr"{CurrentPath}\..\IceBarImages\InitiateTransferButton.png") # Checks if the 2nd window after you press transfer is up
-            pya.write(f"{TransferNumber} \n") # Types number and then press enter
-            sleep(1)
-            break
-        except:
-            print("Couldn't find the initiate transfer button, retrying")
-            sleep(0.1)
-            if i == 99: # If 10 seconds passed and transfer still not complete
-                print("Failed operation. PC too laggy") 
-                pya.moveTo(InitialPosition) 
-                return
+
+# Gets caller's message
+def getCallerMessage():   
+    recognizer = sr.Recognizer() # Initiate Recognizer
+    microphone = sr.Microphone() # Initiate Mic
+    AskedtoSpeakAlready = False
+    with microphone as source: # Gets mic to listen to
+        while True:
+            print("Now Listening to Caller.....")
+            try:
+                audio = recognizer.listen(source, timeout=5) # Listens to customer's yap
+            except sr.WaitTimeoutError:
+                print("No message detected.")
+                LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
+                AskedtoSpeakAlready = True
+                if LeaveCallNotice == "Left the Call":
+                    return
+                else:
+                    continue
             
-    CloseWindow("(External)") # Close the calling window   
-    print("Transfer Successful!")
-    pya.moveTo(InitialPosition) # End
-    # FINAL PHASE - Return to Normal
-    print("The deed is done")
+            print("Stopped recording")
+            try: # Try to save their message
+                with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file:
+                    file.write(audio.get_wav_data())
+                print("Audio saved as CallersMessage.wav")
+            except Exception as e:
+                print(f"Unable to save audio somehow {e}")
+            try: # Tries to transcribe audio
+                result = model.transcribe(fr"{CurrentPath}\Caller's Message\CallersMessage.wav",fp16=False, language='English')
+                with open(fr"{CurrentPath}\Caller's Message\CallersMessageTranscription.txt","w") as f:
+                    f.write(result["text"]) # Put it in a transcript.txt file
+                print(f"Message said was: {result['text']}")
+                if result["text"].replace(" ","") == "":
+                    print("No message detected.")
+                    LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
+                    AskedtoSpeakAlready = True
+                    if LeaveCallNotice == "Left the Call":
+                        return
+                    else:
+                        continue
+                return result["text"] # Returns the transcript for the user
+            except Exception as e:
+                print("Failed to recognize audio", e)
+                LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
+                AskedtoSpeakAlready = True
+                if LeaveCallNotice == "Left the Call":
+                    return
+                else:
+                    continue
+            
+
+# Function that asks caller to repeat what they said
+def PleaseRepeat(AskedtoSpeakAlready):
+    if AskedtoSpeakAlready: # If we tried this already
+        SoundFunctions.playVoiceLine("Goodbye") # Says good bye
+        CloseWindow("(External)") # and closes the call window
+        return "Left the Call"
+    else:
+        SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
+# Make AskedtoSpeakAlready = True and add a continue after this function

@@ -11,3 +11,4 @@ openai
 pydub
 ollama
 pyttsx3
+pygame

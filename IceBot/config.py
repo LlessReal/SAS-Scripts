@@ -2,6 +2,7 @@ import os, whisper
 
 ViewAllDeviceNames = False # Btw , if this is on the program won't go
 VoicelineFolderName = "Mickey" # Add GoodAfternoon.wav, GoodMorning.wav, Greeting.wav (With numbers after), PleaseWait.wav, and Repeat.wav inside this folder
+ModelName = "sblight2"  # Replace with your desired Ollama model
 
 # Important phone numbers and names
 ImportantTermDictionary = {

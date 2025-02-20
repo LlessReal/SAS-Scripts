@@ -13,7 +13,8 @@ root.wait_visibility() # Wait until the label becomes visible
 root.geometry("600x360") # Sets the window size
 root.config(background="Gray")
 StopSetting = IntVar()
-def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
+TestingBotToggle = IntVar()
+def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResponse=""):
     if Reset == True:
         ResetGui()
         OpenWindow("IceBot Gui")
@@ -71,7 +72,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease())
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease(SayMessage=RepeatToggle.get()))
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
     # Wait Toggle
@@ -80,6 +81,9 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     WaitToggleOn = Checkbutton(root,text="Wait for Reaction",variable=WaitToggle)
     WaitToggleOn.grid(row=6 + NextInLine,column=0)
 
+    if "INITIATE TRANSFER" in BotsResponse:
+        AutoTransferSubmitVersion(BotsResponse[BotsResponse.find("- ") + 2:BotsResponse.find("]")],TransferLineToggle.get(),WaitToggle.get())
+        
     # Start Main Function
     #if StartingProgram:
     if not StartingProgram:
@@ -95,6 +99,12 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     StopAllSoundsButton = Button(root, text = "Stop all Sounds", bg="black", fg="white", command = StopSounds)
     StopAllSoundsButton.grid(row=6 + NextInLine,column=2) # One bit over all the others
     
+    # Repeat Toggle
+    RepeatToggle = IntVar()
+    RepeatToggle.set(0)
+    RepeatToggleBox = Checkbutton(root, text="Repeat Toggle",variable=RepeatToggle) 
+    RepeatToggleBox.grid(row=7 + NextInLine,column=0)
+
     # Speed Scale
     SpeedScaleVariable = DoubleVar()
     SpeedScaleVariable.set(1.0)
@@ -118,15 +128,16 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False):
     # Stereo Mix Toggle Button
     SpeakersToggle = Button( root, text="Activate Speakers", bg="purple",fg="white",command= lambda:  MTeamsChangeInputDevice("Speakers")) 
     SpeakersToggle.grid(row=9 + NextInLine,column=1)
+
     # Testing Bot Mode
-    TestingBotToggle = IntVar()
+    
     if StartingProgram:
         TestingBotToggle.set(0)
     TestingBotToggleBox = Checkbutton(root, text="Testing Bot",variable=TestingBotToggle,state= "disabled" if not StartingProgram else "normal") 
     TestingBotToggleBox.grid(row=9 + NextInLine,column=2)
     global InitiationThread
     InitiationThread = threading.Thread(target=lambda: StartFunction(TestingBotToggle.get(),StartingProgram=False))
-   
+    
     # Refresh Button
     RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 
     RefreshGuiButton.grid(row=10 + NextInLine,column=1)
@@ -141,6 +152,7 @@ def ResetGui():
     for widget in root.winfo_children(): # Iterate through every widget inside the frame
         widget.destroy() # deleting widget
 
+# Function that returns to the start
 def BackToStageOne(AfterTransfer=False):
     if StopSetting.get() == 0:
         if AfterTransfer:
