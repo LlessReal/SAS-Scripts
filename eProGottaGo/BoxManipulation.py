@@ -2,6 +2,7 @@ import pyautogui as pya
 import pyperclip as pc
 import clipboard as cb
 import config, keyboard, time
+import Acrobat
 
 # Function to fill color
 def FillColor(Down,Right):
@@ -34,6 +35,15 @@ def MarkNA(): # Put in coordinates of where the N/A should be written
     keyboard.write("N/A\n") # Puts in Req ID and paste it (with enter)
     pya.press('up') # Goes back to OG box
     FillColor(6,1) # Marks red
+
+def AddSRNum(ReqID):
+    AllTextAfterReqID = Acrobat.AllTextFromDoc[Acrobat.AllTextFromDoc.find(ReqID):]
+    SRNumber = AllTextAfterReqID[AllTextAfterReqID.find("SR"):AllTextAfterReqID.find("SR") + 8]
+    print(SRNumber)
+    keyboard.write(SRNumber + "\n")
+    pya.press('up') 
+    FillColor(4,0) # Marks red
+    
 
 # Move to N/A Box depending on ReqID Column location
 def MoveToNABox():

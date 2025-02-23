@@ -6,6 +6,7 @@ import BoxManipulation, Acrobat, OtherFunctions, config, time
 running = True
 
 def main():
+    cb.copy("") # Reset clipboard for no problems
     print("Program starts in a sec (to get rid of shortcut bullshit)")
     time.sleep(1)
     global running
@@ -49,7 +50,8 @@ def main():
         if SRSearch == "No SR":
             BoxManipulation.MarkNA() # Mark as N/A
         elif SRSearch == "SR Found":
-            pass
+            BoxManipulation.AddSRNum(ReqID)
+            
         BoxManipulation.MoveToReqIDBox("Next Row")
         cb.copy(ReqID) # Save ReqID for checking former Req IDs
 
@@ -75,7 +77,6 @@ def stop_function():
 
 
 if __name__ == "__main__":
-    cb.copy("") # Reset clipboard for no problems
     print("Press ctrl+shift+fto commense,ctrl+shift+v to stop.")
     keyboard.add_hotkey("ctrl+shift+f", start_function)
     keyboard.add_hotkey("ctrl+shift+v", stop_function)

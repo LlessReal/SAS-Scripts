@@ -5,3 +5,4 @@ clipboard
 threading
 opencv-python
 pygetwindow
+PyPDF2
