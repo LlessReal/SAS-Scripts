@@ -1,24 +1,24 @@
-import pyautogui as pya
 import clipboard as cb 
-import OtherFunctions, config, keyboard, time
+import config
 from PyPDF2 import PdfReader
 
-Reader = PdfReader(f"{config.CurrentPath}\\Documents\\{config.FulleProDocName}.pdf") # Gets pdf file
 AllTextFromDoc = "" # Extract text from each page
-for page in Reader.pages: # Goes through each page
-    AllTextFromDoc += page.extract_text() # Stores all text in AllTextFromDoc
+for eProDoc in config.eProDocs: # Goes through each document in the list of documents you placed
+    Reader = PdfReader(f"{config.CurrentPath}\\Documents\\{eProDoc}") # Gets pdf file
+    for page in Reader.pages: # Goes through each page of document
+        AllTextFromDoc += page.extract_text() # Stores all text from the page intos AllTextFromDoc
 
-def CheckForSr(ReqID):
-    OtherFunctions.OpenWindow(config.eProDocName) # Open PDF Doc (Must be at 100%)
-    pya.hotkey('ctrl', 'f') # Find
-    keyboard.write(ReqID + "\n") # Puts in Req ID and paste it (with enter)
-    time.sleep(1)
-    try:
-        NoMatches = pya.locateOnScreen(fr'{config.CurrentPath}\NoMatches.png',confidence=0.9) # Tries to look for the No Matches box
+# Check if text grabbed is still empty
+if AllTextFromDoc == "":
+    exit("Why is the documents folder empty.")
+
+# Function that checks if the Req ID is in the document
+def CheckForSRNum(ReqID):
+    if AllTextFromDoc.find(ReqID) == -1: # If the ID wasn't found in the text
         print(f"No SR for {ReqID}") # If error didn't occur above, no SR was found
-        pya.press('enter') # enters outta box
+        cb.copy(f"{ReqID} (No SR Found)") # Copies Status
         return "No SR"
-    except:
+    else:
         print(f"SR Found for {ReqID}") # If no box was found, SR is there
-        cb.copy(f"{ReqID} SR Found") # In order to prevent it from doing N/A in the next spots  
+        cb.copy(f"{ReqID} (SR Found)") # Copies Status
         return "SR Found"

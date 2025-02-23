@@ -2,68 +2,58 @@ import pyautogui as pya
 import keyboard, threading
 import pyperclip as pc
 import clipboard as cb
-import BoxManipulation, Acrobat, OtherFunctions, config, time
+import BoxManipulation, Acrobat, time
 running = True
 
 def main():
     cb.copy("") # Reset clipboard for no problems
     print("Program starts in a sec (to get rid of shortcut bullshit)")
     time.sleep(1)
+
     global running
     while running:
         # Check Former Req ID
-        FormerReqID = pc.paste() # Gets the former grabbed Req ID
+        FormerReqID = pc.paste() 
         print(f"Former ID was {FormerReqID}")
         cb.copy("") # Reset clip board     
 
         # You better have clicked a box at this point
         # Grab Req ID
-        ReqID = BoxManipulation.GrabReqID() # Copies info from Req Box and only gets Req ID
-        # Check for Dupes
-        if pc.paste() in FormerReqID: # If we got the same ID from before
-            if "SR Found" not in FormerReqID:
-                print("A duplicate was found (No SR Found in it)")
-                BoxManipulation.MoveToNABox()
-                BoxManipulation.MarkNA()
-                BoxManipulation.MoveToReqIDBox("Next Row")
-                cb.copy(ReqID) # Fail proof smh
-            else:
+        ReqID = BoxManipulation.GrabReqID() # Gets Req ID from box, and stores it (and copies it as well)
+        
+        # Checking for Duplicates
+        if ReqID in FormerReqID: # If we got the same ID from before
+            if "(SR Found)" in FormerReqID: # If SR was found
                 print("A duplicate was found (SR Was Found in it)")
-                pya.press('down') # Next box, no point in going to N/A box
-                cb.copy(f"{ReqID} SR Found") # In order to prevent it from doing N/A in the next spots
-            continue
-        else:
-            pass   
+                pya.press('down') # Goes to next Req ID box, no point in going to N/A Box
+            elif "(No SR Found)" in FormerReqID: # If no SR was found
+                print("A duplicate was found (No SR Found in it)")
+                BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
+                BoxManipulation.MarkNA() # Mark as N/A and copies status as No SR Found
+                BoxManipulation.MoveBoxes("Req ID") # Returns to ReqID box, and goes to next row
+            cb.copy(FormerReqID) # Copies same former req ID and status
+            continue 
         
-        BoxManipulation.MoveToNABox()
-        # Check for already filled spots
-        pya.hotkey("ctrl","c") # Grabs box from N/A Column
+        # Moving to N/A Box (If previous stage went good)
+        BoxManipulation.MoveBoxes("N/A")
+        pya.hotkey("ctrl","c") # Copies box from N/A Column
         time.sleep(0.5) # Same reason as b4
-        if pc.paste() == "N/A" or "SR" in pc.paste():
-            BoxManipulation.MoveToReqIDBox("Next Row")
+        if pc.paste() == "N/A" or "SR" in pc.paste(): # If already marked as N/A or if a SR number is in it already
+            BoxManipulation.MoveBoxes("Req ID") # Next Req ID
             continue
-        
-        # If spot wasn't filled, searches for SR in pdf doc.
-        SRSearch = Acrobat.CheckForSr(ReqID) # PHASE 2 - CHECK FOR INFO         
-        OtherFunctions.OpenWindow(config.ExcelSheetName) # PHASE 3 - RETURN TO EXCEL SHEET
-        time.sleep(1)
-        if SRSearch == "No SR":
-            BoxManipulation.MarkNA() # Mark as N/A
-        elif SRSearch == "SR Found":
-            BoxManipulation.AddSRNum(ReqID)
-            
-        BoxManipulation.MoveToReqIDBox("Next Row")
-        cb.copy(ReqID) # Save ReqID for checking former Req IDs
-
+        else: # If empty
+            SRSearch = Acrobat.CheckForSRNum(ReqID) # Checks if there's a SR Number     
+            time.sleep(0.5) # Wait a bit
+            if SRSearch == "No SR": # If no SR was deemed to be found
+                BoxManipulation.MarkNA() # Mark as N/A
+            elif SRSearch == "SR Found": # If SR was found
+                BoxManipulation.AddSRNum(ReqID) # Add the SR Number (need to the Req ID to do so)
+            # Next Req ID
+            BoxManipulation.MoveBoxes("Req ID")
         # LOOP
+
     # If code ended due to hotkey, this goes.
     print("The code has halted.")
-
-def screenshotmoment():
-    global running
-    if running:
-        screenshot = pya.screenshot()
-        screenshot.save("Testshot.png")
 
 def start_function():
     global running
@@ -74,10 +64,11 @@ def start_function():
 def stop_function():
     global running
     running = False
+    print("The code will be halted shortly.")
 
 
 if __name__ == "__main__":
-    print("Press ctrl+shift+fto commense,ctrl+shift+v to stop.")
+    print("Press ctrl+shift+f to commense and press ctrl+shift+v to stop.")
     keyboard.add_hotkey("ctrl+shift+f", start_function)
     keyboard.add_hotkey("ctrl+shift+v", stop_function)
     keyboard.wait()

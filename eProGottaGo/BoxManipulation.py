@@ -1,8 +1,7 @@
 import pyautogui as pya
 import pyperclip as pc
 import clipboard as cb
-import config, keyboard, time
-import Acrobat
+import config, keyboard, time, Acrobat
 
 # Function to fill color
 def FillColor(Down,Right):
@@ -23,11 +22,10 @@ def GrabReqID():
     ReqIDColumnText = pc.paste()
     ParsedReqID = ReqIDColumnText[ReqIDColumnText.find("5") - 4:] # Gets only the last few numbers (Finds 5, goes back to get 0s). Stops where a dash is located cuz irrelevant info
     if "-" in ParsedReqID:
-        ParsedReqID = ParsedReqID[0:ReqIDColumnText.find("-")] # Reparse but without that other shit
+        ParsedReqID = ParsedReqID[0:ReqIDColumnText.find("-")] # Reparse but without that other shit after
     print(f"The Parsed Req ID is {ParsedReqID}")
-    print("Req ID Grabbed and Copied!")
     cb.copy(ParsedReqID) # Copy it
-    print(f"Copied ID was {pc.paste()}") # Debug
+    print(f"Req ID Grabbed and Copied! Copied ID: {pc.paste()}") # Debug
     return ParsedReqID # and returns it
 
 # Marks box as N/A
@@ -36,29 +34,21 @@ def MarkNA(): # Put in coordinates of where the N/A should be written
     pya.press('up') # Goes back to OG box
     FillColor(6,1) # Marks red
 
+# Function that adds SR Number to box
 def AddSRNum(ReqID):
     AllTextAfterReqID = Acrobat.AllTextFromDoc[Acrobat.AllTextFromDoc.find(ReqID):]
     SRNumber = AllTextAfterReqID[AllTextAfterReqID.find("SR"):AllTextAfterReqID.find("SR") + 8]
-    print(SRNumber)
     keyboard.write(SRNumber + "\n")
     pya.press('up') 
-    FillColor(4,0) # Marks red
+    FillColor(4,0) # Marks gray
     
-
 # Move to N/A Box depending on ReqID Column location
-def MoveToNABox():
-    for Box in range(config.ColumnDistance):
-        if config.ReqIDColumnOnTheLeft:
-            pya.press('right')
-        else:
-            pya.press('left')
-
-# Move to Req ID Box
-def MoveToReqIDBox(RowShift = ""):
-    if RowShift == "Next Row":
-        pya.press('down')
-    for Box in range(config.ColumnDistance):
-        if config.ReqIDColumnOnTheLeft:
-            pya.press('left')
-        else:
-            pya.press('right')   
+def MoveBoxes(BoxTarget=""):
+    if BoxTarget == "N/A": # if we're moving to the N/A box
+        for Box in range(config.ColumnDistance): # Gets distance to travel
+            pya.press('right' if config.ReqIDColumnOnTheLeft else 'left')
+            # Go right to the N/A box if Req ID is on the left
+    elif BoxTarget == "Req ID": # If we're moving to the Req ID box
+        for Box in range(config.ColumnDistance): 
+            pya.press('left' if config.ReqIDColumnOnTheLeft else 'right')
+            # Go left to the Req ID Box if N/A Box is to the right of the Req ID
