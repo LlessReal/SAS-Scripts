@@ -2,7 +2,7 @@ import pyautogui as pya
 import keyboard, threading
 import pyperclip as pc
 import clipboard as cb
-import BoxManipulation, Acrobat, time
+import BoxManipulation, PDFReader, time
 running = True
 
 def main():
@@ -42,7 +42,7 @@ def main():
             BoxManipulation.MoveBoxes("Req ID") # Next Req ID
             continue
         else: # If empty
-            SRSearch = Acrobat.CheckForSRNum(ReqID) # Checks if there's a SR Number     
+            SRSearch = PDFReader.CheckForSRNum(ReqID) # Checks if there's a SR Number     
             time.sleep(0.5) # Wait a bit
             if SRSearch == "No SR": # If no SR was deemed to be found
                 BoxManipulation.MarkNA() # Mark as N/A

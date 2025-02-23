@@ -1,7 +1,7 @@
 import pyautogui as pya
 import pyperclip as pc
 import clipboard as cb
-import config, keyboard, time, Acrobat
+import config, keyboard, time, PDFReader
 
 # Function to fill color
 def FillColor(Down,Right):
@@ -36,7 +36,7 @@ def MarkNA(): # Put in coordinates of where the N/A should be written
 
 # Function that adds SR Number to box
 def AddSRNum(ReqID):
-    AllTextAfterReqID = Acrobat.AllTextFromDoc[Acrobat.AllTextFromDoc.find(ReqID):]
+    AllTextAfterReqID = PDFReader.AllTextFromDoc[PDFReader.AllTextFromDoc.find(ReqID):]
     SRNumber = AllTextAfterReqID[AllTextAfterReqID.find("SR"):AllTextAfterReqID.find("SR") + 8]
     keyboard.write(SRNumber + "\n")
     pya.press('up') 
