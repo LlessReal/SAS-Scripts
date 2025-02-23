@@ -1,0 +1,14 @@
+pyperclip
+keyboard
+pyautogui
+SpeechRecognition
+sounddevice
+pygetwindow
+tk
+pyaudio
+wave
+openai
+pydub
+ollama
+pyttsx3
+pygame

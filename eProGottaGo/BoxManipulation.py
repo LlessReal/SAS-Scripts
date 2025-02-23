@@ -7,19 +7,18 @@ import config, keyboard, time
 def FillColor(Down,Right):
     pya.press('alt')
     keyboard.write("hh") # Alt + H + H
-    time.sleep(1) # Wait for coloro box to load
+    time.sleep(0.25) # Wait a bit for box to load
     pya.press('down') # Initialize selection
     for Downs in range(Down):
         pya.press('down') # Goes down depending on how much called
-        time.sleep(0.1)
     for Rights in range(Right):
         pya.press('right') # Goes right depending on how much called
-        time.sleep(0.1)
     pya.press('enter') # Confirms color selection
 
 # Parses out ReqID and copies it
 def GrabReqID():
-    pya.hotkey("ctrl","c") # Copies Req ID Colun text
+    pya.hotkey("ctrl","c") # Copies Req ID Column text
+    time.sleep(0.5) # Wait a sec to process, or else it stores "gain" for some goddamn reason
     ReqIDColumnText = pc.paste()
     ParsedReqID = ReqIDColumnText[ReqIDColumnText.find("5") - 4:] # Gets only the last few numbers (Finds 5, goes back to get 0s). Stops where a dash is located cuz irrelevant info
     if "-" in ParsedReqID:
@@ -34,7 +33,6 @@ def GrabReqID():
 def MarkNA(): # Put in coordinates of where the N/A should be written
     keyboard.write("N/A\n") # Puts in Req ID and paste it (with enter)
     pya.press('up') # Goes back to OG box
-    time.sleep(0.5) # Wait for buckets to ungray out
     FillColor(6,1) # Marks red
 
 # Move to N/A Box depending on ReqID Column location

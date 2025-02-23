@@ -6,6 +6,8 @@ import BoxManipulation, Acrobat, OtherFunctions, config, time
 running = True
 
 def main():
+    print("Program starts in a sec (to get rid of shortcut bullshit)")
+    time.sleep(1)
     global running
     while running:
         # Check Former Req ID
@@ -23,6 +25,7 @@ def main():
                 BoxManipulation.MoveToNABox()
                 BoxManipulation.MarkNA()
                 BoxManipulation.MoveToReqIDBox("Next Row")
+                cb.copy(ReqID) # Fail proof smh
             else:
                 print("A duplicate was found (SR Was Found in it)")
                 pya.press('down') # Next box, no point in going to N/A box
@@ -30,9 +33,11 @@ def main():
             continue
         else:
             pass   
-
+        
+        BoxManipulation.MoveToNABox()
         # Check for already filled spots
         pya.hotkey("ctrl","c") # Grabs box from N/A Column
+        time.sleep(0.5) # Same reason as b4
         if pc.paste() == "N/A" or "SR" in pc.paste():
             BoxManipulation.MoveToReqIDBox("Next Row")
             continue
@@ -46,6 +51,7 @@ def main():
         elif SRSearch == "SR Found":
             pass
         BoxManipulation.MoveToReqIDBox("Next Row")
+        cb.copy(ReqID) # Save ReqID for checking former Req IDs
 
         # LOOP
     # If code ended due to hotkey, this goes.
@@ -69,7 +75,8 @@ def stop_function():
 
 
 if __name__ == "__main__":
-    print("Press Shift and F2 to commense, Ctrl and F3 to stop.")
-    keyboard.add_hotkey("shift+f2", start_function)
-    keyboard.add_hotkey("ctrl+f3", stop_function)
+    cb.copy("") # Reset clipboard for no problems
+    print("Press ctrl+shift+fto commense,ctrl+shift+v to stop.")
+    keyboard.add_hotkey("ctrl+shift+f", start_function)
+    keyboard.add_hotkey("ctrl+shift+v", stop_function)
     keyboard.wait()
