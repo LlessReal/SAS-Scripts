@@ -36,7 +36,7 @@ def MarkNA(): # Put in coordinates of where the N/A should be written
 
 # Function that adds SR Number to box
 def AddSRNum(ReqID):
-    AllTextAfterReqID = PDFReader.AllTextFromDoc[PDFReader.AllTextFromDoc.find(ReqID):]
+    AllTextAfterReqID = PDFReader.AllTextFromeProDoc[PDFReader.AllTextFromeProDoc.find(ReqID):]
     SRNumber = AllTextAfterReqID[AllTextAfterReqID.find("SR"):AllTextAfterReqID.find("SR") + 8]
     keyboard.write(SRNumber + "\n")
     pya.press('up') 

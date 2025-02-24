@@ -22,3 +22,5 @@ Loop and repeat
 
 What I will be doing
 Test what actually shows and how do we get the SR
+
+Convert the pdf to text by running the recognition for this program to work
