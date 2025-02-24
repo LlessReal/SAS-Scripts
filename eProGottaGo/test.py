@@ -5,5 +5,3 @@ def screenshot():
     screenshot.save("Testshot.png")
 # Post Config
 CurrentPath = os.path.dirname(__file__) # Gonna need this
-eProDocs = os.listdir(f"{CurrentPath}\\Documents")
-print(eProDocs)

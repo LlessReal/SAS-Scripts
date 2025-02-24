@@ -40,7 +40,16 @@ def AddSRNum(ReqID):
     SRNumber = AllTextAfterReqID[AllTextAfterReqID.find("SR"):AllTextAfterReqID.find("SR") + 8]
     keyboard.write(SRNumber + "\n")
     pya.press('up') 
-    FillColor(4,0) # Marks gray
+    with open(f"{config.CurrentPath}\\NextColor.txt","r") as f:
+        CurrentColor = f.read()
+    ColorDict = {
+        "Orange": [6,2],
+        "Yellow": [6,3],
+        "Green": [6,4],
+        "Blue": [6,6],
+        "Purple": [6,9]
+    }
+    FillColor(ColorDict[CurrentColor][0],ColorDict[CurrentColor][1]) # Marks gray
     
 # Move to N/A Box depending on ReqID Column location
 def MoveBoxes(BoxTarget=""):
@@ -49,6 +58,7 @@ def MoveBoxes(BoxTarget=""):
             pya.press('right' if config.ReqIDColumnOnTheLeft else 'left')
             # Go right to the N/A box if Req ID is on the left
     elif BoxTarget == "Req ID": # If we're moving to the Req ID box
+        pya.press("down")
         for Box in range(config.ColumnDistance): 
             pya.press('left' if config.ReqIDColumnOnTheLeft else 'right')
             # Go left to the Req ID Box if N/A Box is to the right of the Req ID

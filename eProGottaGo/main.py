@@ -3,6 +3,7 @@ import keyboard, threading
 import pyperclip as pc
 import clipboard as cb
 import BoxManipulation, PDFReader, time
+import config
 running = True
 
 def main():
@@ -25,12 +26,17 @@ def main():
         if ReqID in FormerReqID: # If we got the same ID from before
             if "(SR Found)" in FormerReqID: # If SR was found
                 print("A duplicate was found (SR Was Found in it)")
-                pya.press('down') # Goes to next Req ID box, no point in going to N/A Box
+                #BoxManipulation.AddSRNum(ReqID) # Mark as N/A and copies status as No SR Found
             elif "(No SR Found)" in FormerReqID: # If no SR was found
                 print("A duplicate was found (No SR Found in it)")
-                BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
-                BoxManipulation.MarkNA() # Mark as N/A and copies status as No SR Found
-                BoxManipulation.MoveBoxes("Req ID") # Returns to ReqID box, and goes to next row
+                #BoxManipulation.MarkNA() # Mark as N/A and copies status as No SR Found
+            BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
+            pya.press("up")
+            pya.hotkey("ctrl","c")
+            time.sleep(0.5)
+            pya.press("down")
+            pya.hotkey("ctrl","v")
+            BoxManipulation.MoveBoxes("Req ID") # Returns to ReqID box, and goes to next row
             cb.copy(FormerReqID) # Copies same former req ID and status
             continue 
         
@@ -47,6 +53,16 @@ def main():
             if SRSearch == "No SR": # If no SR was deemed to be found
                 BoxManipulation.MarkNA() # Mark as N/A
             elif SRSearch == "SR Found": # If SR was found
+                # Get current color fro mfile
+                with open(f"{config.CurrentPath}\\NextColor.txt","r") as f:
+                    CurrentColor = f.read()
+                # Write next color name
+                with open(f"{config.CurrentPath}\\NextColor.txt","w") as f2:
+                    try: # Tries to write down the next color
+                        f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1])
+                    except: # Resets if at max
+                        f2.write(config.AllColors[0])
+                
                 BoxManipulation.AddSRNum(ReqID) # Add the SR Number (need to the Req ID to do so)
             # Next Req ID
             BoxManipulation.MoveBoxes("Req ID")
@@ -64,11 +80,14 @@ def start_function():
 def stop_function():
     global running
     running = False
-    print("The code will be halted shortly.")
-
 
 if __name__ == "__main__":
-    print("Press ctrl+shift+f to commense and press ctrl+shift+v to stop.")
-    keyboard.add_hotkey("ctrl+shift+f", start_function)
-    keyboard.add_hotkey("ctrl+shift+v", stop_function)
-    keyboard.wait()
+    while True:
+        try:
+            print("Press ctrl+shift+f to commense and press ctrl+shift+v to stop.")
+            keyboard.add_hotkey("ctrl+shift+f", start_function)
+            keyboard.add_hotkey("ctrl+shift+v", stop_function)
+            keyboard.wait()
+        except:
+            print("it stopped")
+            pass

@@ -19,8 +19,8 @@ import pickle
 # Phase 0 - Open Page
 ########################################################
 ExcelDocURL = r"https://csuequest.easyvista.com/index.php?PHPSESSID=ef650fe25b9544a1fc98a3be62e07b51&internalurltime=1740362294#"
-MyCSUUser = "marshall_miguel@columbusstate.edu"
-MyCSUPassword = "Ll3ss1@3$5^Ll3ss1@3$5^"
+MyCSUUser = ""
+MyCSUPassword = ""
 
 def StartUpBrowser():
     options = Options() # Get options
