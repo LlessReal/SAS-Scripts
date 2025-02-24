@@ -20,6 +20,10 @@ def GrabReqID():
     pya.hotkey("ctrl","c") # Copies Req ID Column text
     time.sleep(0.5) # Wait a sec to process, or else it stores "gain" for some goddamn reason
     ReqIDColumnText = pc.paste()
+    if ReqIDColumnText.replace(" ","") is "":
+        return "Empty"
+    if "00005" not in ReqIDColumnText:
+        return "Unknown"
     ParsedReqID = ReqIDColumnText[ReqIDColumnText.find("5") - 4:] # Gets only the last few numbers (Finds 5, goes back to get 0s). Stops where a dash is located cuz irrelevant info
     if "-" in ParsedReqID:
         ParsedReqID = ParsedReqID[0:ReqIDColumnText.find("-")] # Reparse but without that other shit after
@@ -33,6 +37,11 @@ def MarkNA(): # Put in coordinates of where the N/A should be written
     keyboard.write("N/A\n") # Puts in Req ID and paste it (with enter)
     pya.press('up') # Goes back to OG box
     FillColor(6,1) # Marks red
+
+def MarkUnknown():
+    keyboard.write("Unknown\n")
+    pya.press('up')
+    FillColor(6,0) # Marks dark red
 
 # Function that adds SR Number to box
 def AddSRNum(ReqID):

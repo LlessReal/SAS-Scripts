@@ -10,18 +10,36 @@ def main():
     cb.copy("") # Reset clipboard for no problems
     print("Program starts in a sec (to get rid of shortcut bullshit)")
     time.sleep(1)
-
+    EmptyCounter = 0
     global running
+    FormerReqID = ""
     while running:
         # Check Former Req ID
-        FormerReqID = pc.paste() 
-        print(f"Former ID was {FormerReqID}")
+        if FormerReqID != "":
+            print(f"Former ID was {FormerReqID}")
         cb.copy("") # Reset clip board     
 
         # You better have clicked a box at this point
         # Grab Req ID
         ReqID = BoxManipulation.GrabReqID() # Gets Req ID from box, and stores it (and copies it as well)
         
+        if ReqID == "Empty":
+            pya.press("down") # Next, no coloring
+            EmptyCounter += 1
+            if EmptyCounter == 10:
+                exit() # If we got 10 empty boxes, exit program, we done
+            else:
+                continue # Go back to program
+        else:
+            EmptyCounter = 0 # If it wasn't empty, there's more info
+
+        # If the box was Unknown
+        if ReqID == "Unknown":
+            BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
+            BoxManipulation.MarkUnknown() # Mark unknown
+            BoxManipulation.MoveBoxes("Req ID") # Goes to N/A Box
+            continue
+
         # Checking for Duplicates
         if ReqID in FormerReqID: # If we got the same ID from before
             if "(SR Found)" in FormerReqID: # If SR was found
@@ -33,11 +51,9 @@ def main():
             BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
             pya.press("up")
             pya.hotkey("ctrl","c")
-            time.sleep(0.5)
             pya.press("down")
             pya.hotkey("ctrl","v")
             BoxManipulation.MoveBoxes("Req ID") # Returns to ReqID box, and goes to next row
-            cb.copy(FormerReqID) # Copies same former req ID and status
             continue 
         
         # Moving to N/A Box (If previous stage went good)
@@ -49,7 +65,6 @@ def main():
             continue
         else: # If empty
             SRSearch = PDFReader.CheckForSRNum(ReqID) # Checks if there's a SR Number     
-            time.sleep(0.5) # Wait a bit
             if SRSearch == "No SR": # If no SR was deemed to be found
                 BoxManipulation.MarkNA() # Mark as N/A
             elif SRSearch == "SR Found": # If SR was found
@@ -62,8 +77,9 @@ def main():
                         f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1])
                     except: # Resets if at max
                         f2.write(config.AllColors[0])
-                
+            
                 BoxManipulation.AddSRNum(ReqID) # Add the SR Number (need to the Req ID to do so)
+            FormerReqID = f"{ReqID} (SR Found)" if SRSearch == "SR Found" else f"{ReqID} (No SR Found)"
             # Next Req ID
             BoxManipulation.MoveBoxes("Req ID")
         # LOOP

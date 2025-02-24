@@ -18,9 +18,7 @@ if AllTextFromeProDoc == "":
 def CheckForSRNum(ReqID):
     if AllTextFromeProDoc.find(ReqID) == -1: # If the ID wasn't found in the text
         print(f"No SR for {ReqID}") # If error didn't occur above, no SR was found
-        cb.copy(f"{ReqID} (No SR Found)") # Copies Status
         return "No SR"
     else:
         print(f"SR Found for {ReqID}") # If no box was found, SR is there
-        cb.copy(f"{ReqID} (SR Found)") # Copies Status
         return "SR Found"
