@@ -2,6 +2,7 @@ import os
 ColumnDistance = 4 # Shifts this amount of times to go to each box , do ur math kiddos
 # Saves: 4 - Practice , 1 - New
 ReqIDColumnOnTheLeft = True # If it's on the left, else it's from the right
+ShowText = True
 
 # Post Config
 CurrentPath = os.path.dirname(__file__) # Gonna need this

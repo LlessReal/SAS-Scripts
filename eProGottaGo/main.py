@@ -1,13 +1,11 @@
 import pyautogui as pya
 import keyboard, threading
 import pyperclip as pc
-import clipboard as cb
 import BoxManipulation, PDFReader, time
 import config
 running = True
 
 def main():
-    cb.copy("") # Reset clipboard for no problems
     print("Program starts in a sec (to get rid of shortcut bullshit)")
     time.sleep(1)
     EmptyCounter = 0
@@ -16,18 +14,19 @@ def main():
     while running:
         # Check Former Req ID
         if FormerReqID != "":
-            print(f"Former ID was {FormerReqID}")
-        cb.copy("") # Reset clip board     
+            print(f"Former ID was {FormerReqID}")  
 
         # You better have clicked a box at this point
         # Grab Req ID
         ReqID = BoxManipulation.GrabReqID() # Gets Req ID from box, and stores it (and copies it as well)
         
         if ReqID == "Empty":
+            print("Empty Box")
             pya.press("down") # Next, no coloring
             EmptyCounter += 1
             if EmptyCounter == 10:
-                exit() # If we got 10 empty boxes, exit program, we done
+                print("10 Empty Boxes detected, stopping program")
+                running = False # If we got 10 empty boxes, exit program, we done
             else:
                 continue # Go back to program
         else:
@@ -35,9 +34,15 @@ def main():
 
         # If the box was Unknown
         if ReqID == "Unknown":
+            print("Unknown Box.")
             BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
             BoxManipulation.MarkUnknown() # Mark unknown
             BoxManipulation.MoveBoxes("Req ID") # Goes to N/A Box
+            continue
+
+        if ReqID == "Cool Down":
+            print("Cooling down....")
+            time.sleep(30)
             continue
 
         # Checking for Duplicates

@@ -1,4 +1,3 @@
-import clipboard as cb 
 import config
 from PyPDF2 import PdfReader
 
@@ -7,6 +6,9 @@ for eProDoc in config.eProDocs: # Goes through each document in the list of docu
     Reader = PdfReader(f"{config.CurrentPath}\\Documents\\{eProDoc}") # Gets pdf file
     for page in Reader.pages: # Goes through each page of document
         AllTextFromeProDoc += page.extract_text() # Stores all text from the page intos AllTextFromDoc
+if config.ShowText:
+    print(AllTextFromeProDoc)
+    print("\nReview above text")
     
 # we're reading all the pages from each doc ya 
 

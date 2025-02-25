@@ -31,3 +31,4 @@ def CheckForSRNum(ReqID):
         print(f"SR Found for {ReqID}") # If no box was found, SR is there
         cb.copy(f"{ReqID} SR Found") # In order to prevent it from doing N/A in the next spots  
         return "SR Found"
+# Removed almost all copy and paste stuff because we're not using the actual pdf anymore

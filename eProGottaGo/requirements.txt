@@ -2,7 +2,6 @@ pyperclip
 keyboard
 pyautogui
 clipboard
-threading
 opencv-python
 pygetwindow
 PyPDF2
