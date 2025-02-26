@@ -1,26 +1,12 @@
-import clipboard as cb 
-import config
 from PyPDF2 import PdfReader
-import os
 import pyautogui as pya
 import keyboard as kb
-import threading
 from time import sleep
-import re
-
-
-# Function that checks if the Req ID is in the document
-def CheckForSRNum():
-    if AramarkInvoice.find("SR") == -1: # If the ID wasn't found in the text
-        print(f"No SR Number detected") # If error didn't occur above, no SR was found
-        return "No SR"
-    else:
-        return "SR Found"
-    
-AllTextFromInvoice = "" # Extract text from each page
+import os, threading, re, eQuestBrowsing, config
 
 # Function that makes a text-readable PDF document
 def PreparePDFFile(AramarkInvoice):
+    # Function that checks if the Req ID is in the document
     def OpenInvoice():
         os.system(f'"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}"') # Doing it alone will cause issues
     PDFOpeningThread = threading.Thread(target=OpenInvoice)
@@ -49,38 +35,38 @@ def PreparePDFFile(AramarkInvoice):
             break # else the scan is finished
 
 # Make the PDF File
-for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
-    Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
-    for page in Reader.pages: # Goes through each page of document
-        AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc
-    if AllTextFromInvoice == "":
-        PreparePDFFile(AramarkInvoice)
-        # Redo
+def ReadFiles():
+    AllTextFromInvoice = "" # Extract text from each page
+    for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
         Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
         for page in Reader.pages: # Goes through each page of document
-            AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
-        print("PDF is now text-readable by PyPDF!" if AllTextFromInvoice != "" else "Mission Failed.")
+            AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc
+        if AllTextFromInvoice == "":
+            PreparePDFFile(AramarkInvoice)
+            # Redo
+            Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
+            for page in Reader.pages: # Goes through each page of document
+                AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
+            print("PDF is now text-readable by PyPDF!" if AllTextFromInvoice != "" else "Mission Failed.")
 
-    # Find all 6 digit numbers in the document
-    All6DigitNums = re.findall(r'\d{6}', AllTextFromInvoice)
-    SRNum = ""
-    if "SR" in AllTextFromInvoice:
-        SRNum = AllTextFromInvoice[AllTextFromInvoice.find("SR"):AllTextFromInvoice.find("SR") + 8]
-    else:
+        # Find all 6 digit numbers in the document
+        All6DigitNums = re.findall(r'\d{6}', AllTextFromInvoice)
+        SRNum = ""
         for DigitNum in All6DigitNums: 
             if DigitNum.startswith("3"):
-                SRNum = DigitNum
+                SRNum = AllTextFromInvoice[AllTextFromInvoice.find(DigitNum) - 2:AllTextFromInvoice.find(DigitNum) + 8]
                 print(f"{SRNum} is the SR Number so far")
-    if SRNum == "":
-        print("We got nothin")
-    else:
-        print(f"{SRNum} is the SR Number")
-        AllAfter = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
-        FullSRNameIG = AllAfter[:AllAfter.find("\n")]
-        print(f"{FullSRNameIG} is the almost full SR name, file will be renamed to that.")
-        os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRNameIG}.pdf")
-
-
-    #input("")
-    #os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoiceDoc}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
-    #CheckForSRNum()
+        if SRNum == "":
+            print("We got nothin")
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Failure\\{FullSRNameIG}.pdf")
+            continue
+        else: # If we got an SR Number
+            print(f"{SRNum} is the SR Number")
+            AllAfter = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
+            FullSRNameIG = AllAfter[:AllAfter.find("\n")]
+            print(f"{FullSRNameIG} is the almost full SR name, file will be renamed to that.")
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRNameIG}.pdf")
+            eQuestBrowsing.SearchSRNum(SRNum)
+            eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRNameIG}.pdf",SRNum,f"{FullSRNameIG}.pdf")
+            print("We did it !! - Dora")
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRNameIG}.pdf")
