@@ -2,10 +2,16 @@ from PyPDF2 import PdfReader
 import pyautogui as pya
 import keyboard as kb
 from time import sleep
-import os, threading, re, eQuestBrowsing, config
+import os, threading, re, eQuestBrowsing, config, MyCSUAutoLogin
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import Select
 
+
+wait = WebDriverWait(MyCSUAutoLogin.driver,300)
 # Function that makes a text-readable PDF document
-def PreparePDFFile(AramarkInvoice):
+def PrepareAdobePDFFile(AramarkInvoice):
     # Function that checks if the Req ID is in the document
     def OpenInvoice():
         os.system(f'"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}"') # Doing it alone will cause issues
@@ -34,21 +40,51 @@ def PreparePDFFile(AramarkInvoice):
         except:
             break # else the scan is finished
 
+def OnlineOCR(AramarkInvoice):
+    MyCSUAutoLogin.driver.get("https://www.onlineocr.net/")
+    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='fileupload']")))
+    sleep(1)
+    FileDrop = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
+    FileDrop.send_keys(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
+
+    # Select box (no wait)
+    select = Select(MyCSUAutoLogin.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
+    select.select_by_visible_text('Text Plain (txt)')
+
+    # Convert (No wait)
+    ConvertButton = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@id='MainContent_btnOCRConvert']") 
+    ConvertButton.click()
+
+    # Getting Output text
+    wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']")))
+    OutputArea = MyCSUAutoLogin.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
+    return OutputArea.text
+
+def GetPDFText(AramarkInvoice,Method):
+    TextGathered = ""
+    if Method == "Adobe":
+        Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
+        for page in Reader.pages: # Goes through each page of document
+            TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc
+        if TextGathered == "":
+            PrepareAdobePDFFile(AramarkInvoice)
+            # Redo
+            Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
+            for page in Reader.pages: # Goes through each page of document
+                TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
+            print("PDF is now text-readable by PyPDF!" if TextGathered != "" else "Mission Failed.")
+    elif Method == "Online":
+        return OnlineOCR(AramarkInvoice)
+
 # Make the PDF File
 def ReadFiles():
     AllTextFromInvoice = "" # Extract text from each page
     for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
-        Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
-        for page in Reader.pages: # Goes through each page of document
-            AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc
+        AllTextFromInvoice = GetPDFText(AramarkInvoice,config.PDFRecognitionMethod)
         if AllTextFromInvoice == "":
-            PreparePDFFile(AramarkInvoice)
-            # Redo
-            Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
-            for page in Reader.pages: # Goes through each page of document
-                AllTextFromInvoice += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
-            print("PDF is now text-readable by PyPDF!" if AllTextFromInvoice != "" else "Mission Failed.")
+            exit("Fail")
 
+            
         # Find all 6 digit numbers in the document
         All6DigitNums = re.findall(r'\d{6}', AllTextFromInvoice)
         SRNum = ""

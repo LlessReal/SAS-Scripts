@@ -2,7 +2,7 @@ import os
 
 MyCSUUser = ""
 MyCSUPassword = ""
-
+PDFRecognitionMethod = "Online" # Adobe
 # Post Config shit
 CurrentPath = os.path.dirname(__file__)
 AramarkInvoices = os.listdir(f"{CurrentPath}\\Aramark Invoices") # Gets all documents from the documents folder
