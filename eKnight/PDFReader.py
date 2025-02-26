@@ -2,14 +2,12 @@ from PyPDF2 import PdfReader
 import pyautogui as pya
 import keyboard as kb
 from time import sleep
-import os, threading, re, eQuestBrowsing, config, MyCSUAutoLogin
+import os, threading, re, eQuestBrowsing, config, BrowserOpening
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
-
-wait = WebDriverWait(MyCSUAutoLogin.driver,300)
 # Function that makes a text-readable PDF document
 def PrepareAdobePDFFile(AramarkInvoice):
     # Function that checks if the Req ID is in the document
@@ -41,68 +39,75 @@ def PrepareAdobePDFFile(AramarkInvoice):
             break # else the scan is finished
 
 def OnlineOCR(AramarkInvoice):
-    MyCSUAutoLogin.driver.get("https://www.onlineocr.net/")
+    wait = WebDriverWait(BrowserOpening.driver,300)
+    BrowserOpening.driver.get("https://www.onlineocr.net/")
     wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='fileupload']")))
     sleep(1)
-    FileDrop = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
+    FileDrop = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
     FileDrop.send_keys(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
 
     # Select box (no wait)
-    select = Select(MyCSUAutoLogin.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
+    select = Select(BrowserOpening.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
     select.select_by_visible_text('Text Plain (txt)')
 
     # Convert (No wait)
-    ConvertButton = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@id='MainContent_btnOCRConvert']") 
+    ConvertButton = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='MainContent_btnOCRConvert']") 
     ConvertButton.click()
 
     # Getting Output text
     wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']")))
-    OutputArea = MyCSUAutoLogin.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
+    OutputArea = BrowserOpening.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
     return OutputArea.text
 
 def GetPDFText(AramarkInvoice,Method):
+    print("Grabbing text from documents...")
     TextGathered = ""
     if Method == "Adobe":
         Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
         for page in Reader.pages: # Goes through each page of document
             TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc
-        if TextGathered == "":
-            PrepareAdobePDFFile(AramarkInvoice)
+        if TextGathered == "": # if no text was gather
+            PrepareAdobePDFFile(AramarkInvoice) # Perform text recognition in adobe
             # Redo
             Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
             for page in Reader.pages: # Goes through each page of document
                 TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
             print("PDF is now text-readable by PyPDF!" if TextGathered != "" else "Mission Failed.")
     elif Method == "Online":
-        return OnlineOCR(AramarkInvoice)
+        TextGathered = OnlineOCR(AramarkInvoice)
+        BrowserOpening.eQuestMainPage()
+    return TextGathered
 
-# Make the PDF File
+# Get the SR Number
 def ReadFiles():
     AllTextFromInvoice = "" # Extract text from each page
     for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
+        # Get the text from PDF
         AllTextFromInvoice = GetPDFText(AramarkInvoice,config.PDFRecognitionMethod)
-        if AllTextFromInvoice == "":
+        if AllTextFromInvoice == "": # If the text is still somehow empty 
             exit("Fail")
-
             
-        # Find all 6 digit numbers in the document
-        All6DigitNums = re.findall(r'\d{6}', AllTextFromInvoice)
-        SRNum = ""
-        for DigitNum in All6DigitNums: 
-            if DigitNum.startswith("3"):
-                SRNum = AllTextFromInvoice[AllTextFromInvoice.find(DigitNum) - 2:AllTextFromInvoice.find(DigitNum) + 8]
-                print(f"{SRNum} is the SR Number so far")
-        if SRNum == "":
+        # Find all 6 digit numbers that starts with 3 in the document
+        All6DigitNums = re.findall(r'3\d{5}', AllTextFromInvoice)
+        print(f"All 6 Digit Numbers that start with 3: {All6DigitNums}")
+        for Num in All6DigitNums: # Go through each 3 digit number
+            if AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit(): # If it's some different number
+                All6DigitNums.remove(Num) 
+        print(f"Cleaned list without unrelated numbers: {All6DigitNums}")
+        if All6DigitNums == []:
             print("We got nothin")
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Failure\\{FullSRNameIG}.pdf")
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Failure\\{FullSRName}.pdf")
             continue
         else: # If we got an SR Number
+            SRNum = f"SR{All6DigitNums[0]}"
             print(f"{SRNum} is the SR Number")
-            AllAfter = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
-            FullSRNameIG = AllAfter[:AllAfter.find("\n")]
-            print(f"{FullSRNameIG} is the almost full SR name, file will be renamed to that.")
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRNameIG}.pdf")
+            AllAfterSR = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
+            FullSRName = AllAfterSR[0:AllTextFromInvoice.find("\n")]
+            print(f"{FullSRName} is the full SR name (maybe), file will be renamed to that.")
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf")
             eQuestBrowsing.SearchSRNum(SRNum)
-            eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRNameIG}.pdf",SRNum,f"{FullSRNameIG}.pdf")
-            print("We did it !! - Dora")
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRNameIG}.pdf")
+            eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf",SRNum,f"{FullSRName}.pdf")
+            print("We did it !! - Dora !!")
+            # Put in Success folder
+            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
+        # Loop occurs

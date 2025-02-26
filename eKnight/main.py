@@ -1,8 +1,7 @@
-import MyCSUAutoLogin
-import PDFReader
+import BrowserOpening, PDFReader
 
 def main():
-    MyCSUAutoLogin.StartUpBrowser()
+    BrowserOpening.MyCSUAutoLogin()
     PDFReader.ReadFiles()
     print("All documents complete !!")
 

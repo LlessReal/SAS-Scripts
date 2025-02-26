@@ -6,13 +6,17 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys # Needed for sending keys
 
-def StartUpBrowser():
+def MyCSUAutoLogin():
     options = Options() # Get options
     global driver
     driver = webdriver.Chrome(options=options) # Opens Chrome browser with options (if u put any)
+    global actions
+    actions = ActionChains(driver) # Prepares Chrome to make key actions (for future use in the program)
     driver.get("https://mycsu.columbusstate.edu/") # Opens URL for chat area (leads to login)
     driver.maximize_window() # Maxes window
+    global wait
     wait = WebDriverWait(driver,300)
     wait.until(EC.presence_of_element_located((By.NAME,"loginfmt"))) # Wait for box to partially load
     time.sleep(1) # Wait for page to load
@@ -25,15 +29,21 @@ def StartUpBrowser():
     PasswordBox = driver.find_element(By.NAME,"passwd")
     PasswordBox.send_keys(config.MyCSUPassword + "\n")
     
-    # Complete 2 Factor
+    # Selects 2 Factor button or whatever
+    wait.until(EC.presence_of_element_located((By.XPATH,"//div[text()='Verify your identity']")))
+    actions.send_keys(Keys.ENTER)
+    actions.perform()
+
+    # Complete the 2 Factor
     
     # Wait for page to load
     wait.until(EC.title_contains("MyCSU"))
-    time.sleep(1)
-    # Open eQuest Service Manage
-    driver.get("https://csuequest.easyvista.com/")
+    eQuestMainPage()
+
+
+def eQuestMainPage():
+    driver.get("https://csuequest.easyvista.com/") # Open eQuest Service Manager Main Page
     # Wait till Search Box
-    wait.until(EC.presence_of_element_located((By.ID,"search-input")))
-    
-    global actions
-    actions = ActionChains(driver) # Prepares Chrome to make key actions (for future use in the program)
+    wait.until(EC.presence_of_element_located((By.XPATH,"//input[@id='search-input']")))
+    # Program begins.
+    time.sleep(1)

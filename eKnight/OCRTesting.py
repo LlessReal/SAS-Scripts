@@ -1,4 +1,4 @@
-import config, time
+import config, time, re
 from selenium.webdriver.common.by import By
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -34,3 +34,5 @@ def BuildTextFile(AramarkInvoice):
 
 text = BuildTextFile(config.AramarkInvoices[0])
 print(text)
+All6DigitNums = re.findall(r'3\d{5}', text)
+print(All6DigitNums)

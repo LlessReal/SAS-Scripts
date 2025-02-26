@@ -1,105 +1,122 @@
 import time
-import MyCSUAutoLogin
+import BrowserOpening
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys # Needed for sending keys
 
-wait = WebDriverWait(MyCSUAutoLogin.driver,300)
-
-def SearchSRNum(SRNum):
-    wait.until(EC.presence_of_element_located((By.NAME,"loginfmt"))) # Wait for box to partially load
-    # Send stuff to search box
-    eQuestSearchBox = MyCSUAutoLogin.driver.find_element(By.ID,"search-input")
-    eQuestSearchBox.send_keys(SRNum)
-    ResultsList = MyCSUAutoLogin.driver.find_element(By.CLASS_NAME,"results-list")
-    while ResultsList.text.replace(" ","") == "":
-        pass
-    eQuestSearchBox.send_keys("\n")
+# Put SR Number in the search
+def SearchSRNum(SRNum):    
+    # Send SR Number to search box
     time.sleep(5)
+    eQuestSearchBox = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='search-input']") 
+    eQuestSearchBox.click()
+    time.sleep(1)
+    eQuestSearchBox.send_keys(SRNum)
+    print("Sent SR Number")
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"results-list"))) # Wait for page to load.
+    ResultsList = BrowserOpening.driver.find_element(By.CLASS_NAME,"results-list")
+    while ResultsList.text.replace(" ","") == "": # Wait until results show
+        ResultsList = BrowserOpening.driver.find_element(By.CLASS_NAME,"results-list")
+        pass
+    print("Found Results List")
+    eQuestSearchBox.send_keys("\n") # Press enter to go to page.
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Details']"))) # Wait for page to load.
+    time.sleep(2)
 
-def AttachPDF(PDFFilePath,SRNum,FullSRNumIG):
-    DetailsBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//span[text()='Details']") 
+# Function to select from drop down request in eQuest
+def eQuestDropDownSelect():
+    BrowserOpening.actions.send_keys(Keys.ARROW_DOWN)
+    BrowserOpening.actions.perform()
+    time.sleep(0.5)
+    BrowserOpening.actions.send_keys(Keys.ENTER)
+    BrowserOpening.actions.perform()
+
+# Pretty much the last function of the program, attach the pdf
+def AttachPDF(PDFFilePath,SRNum,FullSRNum):
+    # Press Details Box
+    DetailsBox = BrowserOpening.driver.find_element(By.XPATH, "//span[text()='Details']") 
     DetailsBox.click()
-    wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Attachments']")))
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Attachments']")))
     time.sleep(1)
 
-    # Attachment Button
-    AttachmentButton = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Attachments']") 
+    # Press Attachment Button
+    AttachmentButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Attachments']") 
     AttachmentButton.click()
-    wait.until(EC.presence_of_element_located((By.ID, "file_to_upload")))
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.ID, "file_to_upload")))
     time.sleep(1)
 
     # Gets drop box
-    PDFDropBox = MyCSUAutoLogin.driver.find_element(By.ID, "file_to_upload")
+    PDFDropBox = BrowserOpening.driver.find_element(By.ID, "file_to_upload")
     # Perform the drag and drop action
-    MyCSUAutoLogin.actions.drag_and_drop(PDFFilePath, PDFDropBox)
-    MyCSUAutoLogin.actions.perform()
-    wait.until(EC.presence_of_element_located((By.XPATH, f"//span[text()='{FullSRNumIG}.pdf']")))
+    BrowserOpening.actions.drag_and_drop(PDFFilePath, PDFDropBox)
+    BrowserOpening.actions.perform()
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, f"//span[text()='{FullSRNum}.pdf']")))
     time.sleep(1)
 
     # Click close button
-    CloseButton = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Close']") 
+    CloseButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Close']") 
     CloseButton.click()
     time.sleep(1)
 
     # Click Activity Box
-    ActivityBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//span[text()='Activity']") 
+    ActivityBox = BrowserOpening.driver.find_element(By.XPATH, "//span[text()='Activity']") 
     ActivityBox.click()
     time.sleep(1)
 
-    SupportPersonBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//div[@field-label='Support Person']") 
+    # Get Support Person's Name
+    SupportPersonBox = BrowserOpening.driver.find_element(By.XPATH, "//div[@field-label='Support Person']") 
     SupportPersonBoxContents = SupportPersonBox.text
     SupportPersonName = SupportPersonBoxContents.replace("Support Person","").replace(" ","")
 
     # Click Log Activity Box
-    LogActivityBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Log Activity']") 
+    LogActivityBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Log Activity']") 
     LogActivityBox.click()
-    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='eventcombo-ui']")))
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='eventcombo-ui']")))
     time.sleep(1)
     
     # Type Internal Input
-    ActionType = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@id='eventcombo-ui']") 
+    ActionType = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='eventcombo-ui']") 
     ActionType.send_keys("_Internal Update_")
-    MyCSUAutoLogin.actions.send_keys(Keys.ARROW_DOWN)
-    MyCSUAutoLogin.actions.perform()
-    time.sleep(0.25)
-    MyCSUAutoLogin.actions.send_keys(Keys.ENTER)
-    MyCSUAutoLogin.actions.perform()
     time.sleep(2)
-    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='text']")))
+    eQuestDropDownSelect()
+
+    # Put in the input for Support Person
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='text']")))
     time.sleep(1)
-    SupportPersonInput = MyCSUAutoLogin.driver.find_element(By.XPATH, "//input[@type='text']") 
+    SupportPersonInput = BrowserOpening.driver.find_element(By.XPATH, "//input[@type='text']") 
     SupportPersonInput.send_keys(SupportPersonName)
     time.sleep(10)
-    MyCSUAutoLogin.actions.send_keys(Keys.ARROW_DOWN)
-    MyCSUAutoLogin.actions.perform()
-    time.sleep(0.25)
-    MyCSUAutoLogin.actions.send_keys(Keys.ENTER)
-    MyCSUAutoLogin.actions.perform()
+    eQuestDropDownSelect()
     time.sleep(10)
-    SendEmailBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Send Email & Finish']") 
+    SendEmailBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Send Email & Finish']") 
     SendEmailBox.click()
     time.sleep(5)
 
-    EmailMessageBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//body[@id='tinymce']") 
+    # Send EMail
+    EmailMessageBox = BrowserOpening.driver.find_element(By.XPATH, "//body[@id='tinymce']") 
     EmailMessageBox.send_keys(f"Hello, {SupportPersonName}. Please see the Aramark invoice for {SRNum} attached for payment processing.\n\nThanks,\nJay")
     time.sleep(5)
 
-    FinishBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Finish']") 
+    # Press the finish button
+    FinishBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Finish']") 
     FinishBox.click()
     time.sleep(2)
     
-    # Click Log Activity Box
-    ReopenBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Reopen']") 
-    ReopenBox.click()
-    wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='comment']")))
-    time.sleep(1)
+    # Click ReopenButton
+    ReopenButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Reopen']") 
+    ReopenButton.click()
 
-    # Reopen Message
-    ReopenMessage = MyCSUAutoLogin.driver.find_element(By.XPATH, "//textarea[@id='comment']") 
+    # Make a comment/ Reopen Message
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='comment']")))
+    time.sleep(1)
+    ReopenMessage = BrowserOpening.driver.find_element(By.XPATH, "//textarea[@id='comment']") 
     ReopenMessage.send_keys("Ready For Processing.")
     time.sleep(0.5)
-    FinishBox = MyCSUAutoLogin.driver.find_element(By.XPATH, "//button[text()='Finish']") 
+
+    # Press the finish button
+    FinishBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Finish']") 
     FinishBox.click()
     time.sleep(2)
+
+    # Doneso
+    BrowserOpening.eQuestMainPage()

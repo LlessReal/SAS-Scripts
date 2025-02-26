@@ -1,6 +1,6 @@
 import pyautogui as pya
 import pyperclip as pc
-import config, keyboard, time, PDFReader
+import config, keyboard, time, PDFReader, re
 
 # Function to fill color
 def FillColor(Down,Right):
@@ -47,17 +47,8 @@ def MarkUnknown():
 # Function that adds SR Number to box
 def AddSRNum(ReqID):
     AllTextAfterReqID = PDFReader.AllTextFromeProDoc[PDFReader.AllTextFromeProDoc.find(ReqID):] # Gets Req ID and text in front of it
-    AllTextAfterSR = AllTextAfterReqID[AllTextAfterReqID.find("SR"):] # Get SR Number (that's after req id) and text in front of it
-    while True:
-        if AllTextAfterSR[2:8].isdigit():
-            SRNumber = AllTextAfterSR[0:8]
-            break
-        else:
-            print("SR Mismatch Detected, searching next SR")
-            TheNextSRIndex = AllTextAfterSR.find("SR",AllTextAfterSR.find("SR") + 1) 
-            AllTextAfterSR = AllTextAfterSR[TheNextSRIndex:] # Gets all text after and including the next SR Number
-            continue
-
+    SRNumberGotten = re.findall(r"SR\d{6}",AllTextAfterReqID)
+    SRNumber = SRNumberGotten[0] 
     keyboard.write(SRNumber + "\n")
     pya.press('up') 
     with open(f"{config.CurrentPath}\\NextColor.txt","r") as f:
