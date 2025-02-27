@@ -1,7 +1,7 @@
 import os
 
-MyCSUUser = "marshall_miguel@columbusstate.edu"
-MyCSUPassword = "Ll3ss1@3$5^Ll3ss1@3$5^"
+MyCSUUser = ""
+MyCSUPassword = ""
 PDFRecognitionMethod = "Testing" # Adobe or Online
 # Post Config shit
 CurrentPath = os.path.dirname(__file__)
