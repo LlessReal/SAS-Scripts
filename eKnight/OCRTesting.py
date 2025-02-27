@@ -32,7 +32,16 @@ def BuildTextFile(AramarkInvoice):
     OutputArea = driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
     return OutputArea.text
 
-text = BuildTextFile(config.AramarkInvoices[0])
-print(text)
-All6DigitNums = re.findall(r'3\d{5}', text)
+import os
+AllTextFromInvoice = BuildTextFile(config.AramarkInvoices[0])
+print(AllTextFromInvoice)
+All6DigitNums = re.findall(r'3\d{5}', AllTextFromInvoice)
 print(All6DigitNums)
+# we got an SR Number
+SRNum = f"{All6DigitNums[0]}"
+TrueSRNum = f"SR{All6DigitNums[0]}"
+print(f"{SRNum} is the SR Number")
+AllAfterSR = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
+FullSRName = "SR" + AllAfterSR[0:AllAfterSR.find(" ")]
+print(f"{FullSRName} is the full SR name (maybe), file will be renamed to that.")
+os.rename(f"{config.CurrentPath}\\Aramark Invoices\\SKM.pdf",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf")

@@ -1,5 +1,4 @@
-import time, pyautogui,keyboard, pyautogui
-import BrowserOpening
+import time, BrowserOpening, config
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys # Needed for sending keys
@@ -26,99 +25,79 @@ def SearchSRNum(SRNum):
     BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Details']"))) # Wait for page to load.
     time.sleep(2)
 
-# Function to select from drop down request in eQuest
-def eQuestDropDownSelect():
-    BrowserOpening.actions.send_keys(Keys.ARROW_DOWN)
-    BrowserOpening.actions.perform()
-    time.sleep(0.5)
-    BrowserOpening.actions.send_keys(Keys.ENTER)
-    BrowserOpening.actions.perform()
+# Function to click,send something to, or grab text from element
+# Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
+def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick=""):
+    if SwappingToIframe:
+        BrowserOpening.wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
+        iframe = BrowserOpening.driver.find_element(By.TAG_NAME, "iframe")  # Adjust selector
+        BrowserOpening.driver.switch_to.frame(iframe)
+        print(f"Swapped to Iframe!")
+        time.sleep(1)
+
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, Element)))
+    ElementChosen = BrowserOpening.driver.find_element(By.XPATH, Element)
+    print(f"{Element} found. Committing action in a sec...")
+    time.sleep(1)
+    if Action == "Text Grab":
+        time.sleep(1)
+        return ElementChosen.get_attribute("alt")
+    
+    if AltElement != "": # If we're dooing another element
+        BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, AltElement)))
+        ElementChosen = BrowserOpening.driver.find_element(By.XPATH, AltElement)
+        ElementChosen.send_keys(AltAction) if "Clicking" not in AltAction else ElementChosen.click()
+        if Action == "Clicking and Inputting":
+            BrowserOpening.actions.send_keys(MessageAfterClick).perform()
+    else: # If regular
+        ElementChosen.send_keys(Action) if "Clicking" not in Action else ElementChosen.click()
+        if Action == "Clicking and Inputting":
+            BrowserOpening.actions.send_keys(MessageAfterClick).perform()
+
+    if SwappingToIframe:
+        BrowserOpening.driver.switch_to.default_content()
+    # If statement to turn back to main page was supposed to be here but it wasn't goddamn working for some reason
+    time.sleep(1)
+
+    if eQuestDropDown:
+        BrowserOpening.actions.send_keys(Keys.ARROW_DOWN).perform()
+        time.sleep(0.5)
+        BrowserOpening.actions.send_keys(Keys.ENTER).perform()
+        time.sleep(1)
 
 # Pretty much the last function of the program, attach the pdf
-def AttachPDF(PDFFilePath,SRNum,FullSRNum):
-    # Press Details Box
-    DetailsBox = BrowserOpening.driver.find_element(By.XPATH, "//span[text()='Details']") 
-    DetailsBox.click()
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Attachments']")))
-    time.sleep(1)
-
-    # Press Attachment Button
-    AttachmentButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Attachments']") 
-    AttachmentButton.click()
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.ID, "file_to_upload")))
-    time.sleep(1)
-
-    # Gets drop box
-    PDFDropBox = BrowserOpening.driver.find_element(By.XPATH, "//input[@type='file'")
-    # Perform the drag and drop action
-    PDFDropBox.send_keys(PDFFilePath)
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, f"//span[text()='{FullSRNum}']")))
-    time.sleep(1)
-
-    # Click close button
-    CloseButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Close']") 
-    CloseButton.click()
-    time.sleep(1)
-
-    # Click Activity Box
-    ActivityBox = BrowserOpening.driver.find_element(By.XPATH, "//span[text()='Activity']") 
-    ActivityBox.click()
-    time.sleep(1)
-
-    # Get Support Person's Name
-    SupportPersonBox = BrowserOpening.driver.find_element(By.XPATH, "//div[@field-label='Support Person']") 
-    SupportPersonBoxContents = SupportPersonBox.text
-    SupportPersonName = SupportPersonBoxContents.replace("Support Person","").replace(" ","")
-
-    # Click Log Activity Box
-    LogActivityBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Log Activity']") 
-    LogActivityBox.click()
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='eventcombo-ui']")))
-    time.sleep(1)
+def NotifySupport(PDFFilePath,SRNum):
+    # Attaching doc
+    CommitActionOnElement("//span[text()='Details']","Clicking") # Press Details Box
+    CommitActionOnElement("//button[text()='Attachments']","Clicking") # Press Attachments button
+    CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True) # Send file
+    time.sleep(3)
+    CommitActionOnElement("//button[text()='Close']","Clicking") # Send file
     
-    # Type Internal Input
-    ActionType = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='eventcombo-ui']") 
-    ActionType.send_keys("_Internal Update_")
-    time.sleep(2)
-    eQuestDropDownSelect()
+    # Getting Support Person's name
+    CommitActionOnElement("//span[text()='Activity']","Clicking") # Click Activity Box
+    SupportPersonName = CommitActionOnElement("//img[@class='img-circle img-avatar img-extra-data ng-scope ev-avatar']","Text Grab") # Click Activity Box
+    # We're getting from the first img alt since that'll be the support person
+    print(f"The support person is {SupportPersonName}")
 
-    # Put in the input for Support Person
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//input[@type='text']")))
-    time.sleep(1)
-    SupportPersonInput = BrowserOpening.driver.find_element(By.XPATH, "//input[@type='text']") 
-    SupportPersonInput.send_keys(SupportPersonName)
-    time.sleep(10)
-    eQuestDropDownSelect()
-    time.sleep(10)
-    SendEmailBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Send Email & Finish']") 
-    SendEmailBox.click()
-    time.sleep(5)
-
-    # Send EMail
-    EmailMessageBox = BrowserOpening.driver.find_element(By.XPATH, "//body[@id='tinymce']") 
-    EmailMessageBox.send_keys(f"Hello, {SupportPersonName}. Please see the Aramark invoice for {SRNum} attached for payment processing.\n\nThanks,\nJay")
-    time.sleep(5)
-
-    # Press the finish button
-    FinishBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Finish']") 
-    FinishBox.click()
-    time.sleep(2)
+    # Committing Log Activity
+    CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.log_activity']","Clicking") 
+    CommitActionOnElement("//input[@id='eventcombo-ui']","_Internal Update_",eQuestDropDown=True,SwappingToIframe=True) # Selecting Type of Message/Alert or whatever
+    CommitActionOnElement("//span[@class='form_input_undefined']","Clicking and Inputting",MessageAfterClick=SupportPersonName,eQuestDropDown=True,SwappingToIframe=True) # Selecting Support Specialist as the contact
+    # Sending message
+    CommitActionOnElement("//button[text()='Send Email & Finish']","Clicking") # Press "Send Email & Finish"
+    CommitActionOnElement("//iframe[@title='Rich Text Area']","Clicking",SwappingToIframe=True)
+    BrowserOpening.actions.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
+    with open(f"{config.CurrentPath}\\CustomTags.txt","r") as file:
+        eQuestCustomTags = file.read()
+    BrowserOpening.actions.send_keys(f"Hello, {SupportPersonName}. Please see the Aramark invoice for {SRNum} attached for payment processing.\n\nThanks,\nJay\n\n{eQuestCustomTags}").perform()
+    time.sleep(1000) # Wait for allat to send
+    CommitActionOnElement("//button[text()='Finish']","Clicking") # Press Finish Buttion
     
-    # Click ReopenButton
-    ReopenButton = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Reopen']") 
-    ReopenButton.click()
-
-    # Make a comment/ Reopen Message
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='comment']")))
-    time.sleep(1)
-    ReopenMessage = BrowserOpening.driver.find_element(By.XPATH, "//textarea[@id='comment']") 
-    ReopenMessage.send_keys("Ready For Processing.")
-    time.sleep(0.5)
-
-    # Press the finish button
-    FinishBox = BrowserOpening.driver.find_element(By.XPATH, "//button[text()='Finish']") 
-    FinishBox.click()
-    time.sleep(2)
+    # Changing the status of the ticket
+    CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.hold_reopen']","Clicking") # Click Reopen Button
+    CommitActionOnElement("//textarea[@id='comment']","Ready For Processing.",SwappingToIframe=True) # Make a comment / Reopen Message
+    CommitActionOnElement("//button[text()='Finish']","Clicking") # Press the finish button
 
     # Doneso
     BrowserOpening.eQuestMainPage()

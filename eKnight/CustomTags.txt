@@ -1,0 +1,27 @@
+eQuest Information
+
+Reference Number: #[CUSTOM_TAGS.Number]#
+
+Date Created: #[DB_FIELDS.CREATION_DATE_UT]#
+
+Recipient: #[DB_FIELDS.RECIPIENT_ID.AM_EMPLOYEE.LAST_NAME]#
+
+Requestor: #[DB_FIELDS.REQUESTOR_ID.AM_EMPLOYEE.LAST_NAME]#
+
+Category: #[DB_FIELDS.SD_CATALOG_ID.SD_CATALOG.TITLE_EN]#
+
+Additional Info:
+
+#[WF_TAGS.QUESTION_RESULTS]#
+
+Notes/Comments:
+
+
+
+
+#[DB_FIELDS.E_TECHNICIANFEEDBACK]#
+
+
+
+
+#[DB_FIELDS.COMMENT]#

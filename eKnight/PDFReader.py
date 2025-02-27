@@ -101,14 +101,15 @@ def ReadFiles():
                 continue
             else:
                 # we got an SR Number
-                SRNum = f"SR{All6DigitNums[0]}"
-                print(f"{SRNum} is the SR Number")
+                SRNum = f"{All6DigitNums[0]}"
+                TrueSRNum = f"SR{All6DigitNums[0]}"
+                print(f"{TrueSRNum} is the SR Number")
                 AllAfterSR = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
-                FullSRName = AllAfterSR[0:AllTextFromInvoice.find("\n")]
+                FullSRName = "SR" + AllAfterSR[0:AllAfterSR.find(" ")]
                 print(f"{FullSRName} is the full SR name (maybe), file will be renamed to that.")
                 os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf")
-                eQuestBrowsing.SearchSRNum(SRNum)
-                eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf",SRNum,f"{FullSRName}.pdf")
+                eQuestBrowsing.SearchSRNum(TrueSRNum)
+                eQuestBrowsing.NotifySupport(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf",TrueSRNum)
                 print("We did it !! - Dora !!")
                 # Put in Success folder
                 os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
@@ -118,4 +119,5 @@ def ReadFiles():
         FullSRName = "SR327971_Jokeshit_lol"
         # No renaming
         eQuestBrowsing.SearchSRNum(SRNum)
-        eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\SKM.pdf",SRNum,f"SKM.pdf")
+        eQuestBrowsing.NotifySupport(f"{config.CurrentPath}\\Aramark Invoices\\SKM.pdf",SRNum)
+        print("Test complete.")
