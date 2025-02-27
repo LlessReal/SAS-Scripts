@@ -40,7 +40,6 @@ def MyCSUAutoLogin():
     wait.until(EC.title_contains("MyCSU"))
     eQuestMainPage()
 
-
 def eQuestMainPage():
     driver.get("https://csuequest.easyvista.com/") # Open eQuest Service Manager Main Page
     # Wait till Search Box

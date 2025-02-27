@@ -1,4 +1,4 @@
-import time
+import time, pyautogui,keyboard, pyautogui
 import BrowserOpening
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
@@ -11,7 +11,9 @@ def SearchSRNum(SRNum):
     eQuestSearchBox = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='search-input']") 
     eQuestSearchBox.click()
     time.sleep(1)
-    eQuestSearchBox.send_keys(SRNum)
+    # Would do the same thing but that didn't work.
+    BrowserOpening.actions.send_keys(SRNum)
+    BrowserOpening.actions.perform()
     print("Sent SR Number")
     BrowserOpening.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"results-list"))) # Wait for page to load.
     ResultsList = BrowserOpening.driver.find_element(By.CLASS_NAME,"results-list")
@@ -19,7 +21,8 @@ def SearchSRNum(SRNum):
         ResultsList = BrowserOpening.driver.find_element(By.CLASS_NAME,"results-list")
         pass
     print("Found Results List")
-    eQuestSearchBox.send_keys("\n") # Press enter to go to page.
+    BrowserOpening.actions.send_keys("\n") # Press enter to go to page.
+    BrowserOpening.actions.perform()
     BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Details']"))) # Wait for page to load.
     time.sleep(2)
 
@@ -46,11 +49,10 @@ def AttachPDF(PDFFilePath,SRNum,FullSRNum):
     time.sleep(1)
 
     # Gets drop box
-    PDFDropBox = BrowserOpening.driver.find_element(By.ID, "file_to_upload")
+    PDFDropBox = BrowserOpening.driver.find_element(By.XPATH, "//input[@type='file'")
     # Perform the drag and drop action
-    BrowserOpening.actions.drag_and_drop(PDFFilePath, PDFDropBox)
-    BrowserOpening.actions.perform()
-    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, f"//span[text()='{FullSRNum}.pdf']")))
+    PDFDropBox.send_keys(PDFFilePath)
+    BrowserOpening.wait.until(EC.presence_of_element_located((By.XPATH, f"//span[text()='{FullSRNum}']")))
     time.sleep(1)
 
     # Click close button

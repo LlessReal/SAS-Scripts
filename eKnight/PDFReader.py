@@ -76,38 +76,46 @@ def GetPDFText(AramarkInvoice,Method):
     elif Method == "Online":
         TextGathered = OnlineOCR(AramarkInvoice)
         BrowserOpening.eQuestMainPage()
+    
+    if TextGathered == "":
+        exit("Fail")
     return TextGathered
 
 # Get the SR Number
 def ReadFiles():
     AllTextFromInvoice = "" # Extract text from each page
-    for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
-        # Get the text from PDF
-        AllTextFromInvoice = GetPDFText(AramarkInvoice,config.PDFRecognitionMethod)
-        if AllTextFromInvoice == "": # If the text is still somehow empty 
-            exit("Fail")
-            
-        # Find all 6 digit numbers that starts with 3 in the document
-        All6DigitNums = re.findall(r'3\d{5}', AllTextFromInvoice)
-        print(f"All 6 Digit Numbers that start with 3: {All6DigitNums}")
-        for Num in All6DigitNums: # Go through each 3 digit number
-            if AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit(): # If it's some different number
-                All6DigitNums.remove(Num) 
-        print(f"Cleaned list without unrelated numbers: {All6DigitNums}")
-        if All6DigitNums == []:
-            print("We got nothin")
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Failure\\{FullSRName}.pdf")
-            continue
-        else: # If we got an SR Number
-            SRNum = f"SR{All6DigitNums[0]}"
-            print(f"{SRNum} is the SR Number")
-            AllAfterSR = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
-            FullSRName = AllAfterSR[0:AllTextFromInvoice.find("\n")]
-            print(f"{FullSRName} is the full SR name (maybe), file will be renamed to that.")
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf")
-            eQuestBrowsing.SearchSRNum(SRNum)
-            eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf",SRNum,f"{FullSRName}.pdf")
-            print("We did it !! - Dora !!")
-            # Put in Success folder
-            os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
-        # Loop occurs
+    if config.PDFRecognitionMethod != "Testing": # If we're not testing
+        for AramarkInvoice in config.AramarkInvoices: # Goes through each document in the list of documents you placed
+            # Get the text from PDF
+            AllTextFromInvoice = GetPDFText(AramarkInvoice,config.PDFRecognitionMethod)
+            # Find all 6 digit numbers that starts with 3 in the document
+            All6DigitNums = re.findall(r'3\d{5}', AllTextFromInvoice)
+            print(f"All 6 Digit Numbers that start with 3: {All6DigitNums}")
+            for Num in All6DigitNums: # Go through each 3 digit number
+                if AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit(): # If it's some different number
+                    All6DigitNums.remove(Num) 
+            print(f"Cleaned list without unrelated numbers: {All6DigitNums}")
+            if All6DigitNums == []:
+                print("We got nothin")
+                os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Failure\\{FullSRName}.pdf")
+                continue
+            else:
+                # we got an SR Number
+                SRNum = f"SR{All6DigitNums[0]}"
+                print(f"{SRNum} is the SR Number")
+                AllAfterSR = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
+                FullSRName = AllAfterSR[0:AllTextFromInvoice.find("\n")]
+                print(f"{FullSRName} is the full SR name (maybe), file will be renamed to that.")
+                os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf")
+                eQuestBrowsing.SearchSRNum(SRNum)
+                eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\{FullSRName}.pdf",SRNum,f"{FullSRName}.pdf")
+                print("We did it !! - Dora !!")
+                # Put in Success folder
+                os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
+                # Loop occurs
+    else: # If we are testing
+        SRNum = "SR327971"
+        FullSRName = "SR327971_Jokeshit_lol"
+        # No renaming
+        eQuestBrowsing.SearchSRNum(SRNum)
+        eQuestBrowsing.AttachPDF(f"{config.CurrentPath}\\Aramark Invoices\\SKM.pdf",SRNum,f"SKM.pdf")
