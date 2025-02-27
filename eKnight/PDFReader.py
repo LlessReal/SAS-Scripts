@@ -2,7 +2,7 @@ from PyPDF2 import PdfReader
 import pyautogui as pya
 import keyboard as kb
 from time import sleep
-import os, threading, re, eQuestBrowsing, config, BrowserOpening
+import os, threading, re, eQuestBrowsing, config, BrowserControl
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -39,24 +39,24 @@ def PrepareAdobePDFFile(AramarkInvoice):
             break # else the scan is finished
 
 def OnlineOCR(AramarkInvoice):
-    wait = WebDriverWait(BrowserOpening.driver,300)
-    BrowserOpening.driver.get("https://www.onlineocr.net/")
+    wait = WebDriverWait(BrowserControl.driver,300)
+    BrowserControl.driver.get("https://www.onlineocr.net/")
     wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='fileupload']")))
     sleep(1)
-    FileDrop = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
+    FileDrop = BrowserControl.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
     FileDrop.send_keys(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
 
     # Select box (no wait)
-    select = Select(BrowserOpening.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
+    select = Select(BrowserControl.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
     select.select_by_visible_text('Text Plain (txt)')
 
     # Convert (No wait)
-    ConvertButton = BrowserOpening.driver.find_element(By.XPATH, "//input[@id='MainContent_btnOCRConvert']") 
+    ConvertButton = BrowserControl.driver.find_element(By.XPATH, "//input[@id='MainContent_btnOCRConvert']") 
     ConvertButton.click()
 
     # Getting Output text
     wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']")))
-    OutputArea = BrowserOpening.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
+    OutputArea = BrowserControl.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
     return OutputArea.text
 
 def GetPDFText(AramarkInvoice,Method):
@@ -75,7 +75,7 @@ def GetPDFText(AramarkInvoice,Method):
             print("PDF is now text-readable by PyPDF!" if TextGathered != "" else "Mission Failed.")
     elif Method == "Online":
         TextGathered = OnlineOCR(AramarkInvoice)
-        BrowserOpening.eQuestMainPage()
+        BrowserControl.eQuestMainPage()
     
     if TextGathered == "":
         exit("Fail")
@@ -116,7 +116,6 @@ def ReadFiles():
                 # Loop occurs
     else: # If we are testing
         SRNum = "SR327971"
-        FullSRName = "SR327971_Jokeshit_lol"
         # No renaming
         eQuestBrowsing.SearchSRNum(SRNum)
         eQuestBrowsing.NotifySupport(f"{config.CurrentPath}\\Aramark Invoices\\SKM.pdf",SRNum)
