@@ -38,7 +38,7 @@ def eQuestMainPage():
 
 # Function to click,send something to, or grab text from element
 # Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
-def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False,Delay=0):
+def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False,Delay=0,SuccessMessage="Successfully Completed",TypeOfItem=""):
     if SwappingToIframe:
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
         iframe = driver.find_element(By.TAG_NAME, "iframe")  # Adjust selector
@@ -52,6 +52,7 @@ def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltA
     time.sleep(1)
     if Action == "Grab Text":
         time.sleep(Delay)
+        print(f"{TypeOfItem} - {ElementChosen.get_attribute("alt")}")
         return ElementChosen.get_attribute("alt")
     
     if AltElement != "": # If we're dooing another element
@@ -80,4 +81,5 @@ def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltA
         time.sleep(0.5)
         actions.send_keys(Keys.ENTER).perform()
         time.sleep(1)
+    print(SuccessMessage)
     time.sleep(Delay)
