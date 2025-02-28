@@ -6,40 +6,29 @@ from selenium.webdriver.common.keys import Keys # Needed for sending keys
 # Put SR Number in the search
 def SearchSRNum(TrueSRNum):    
     # Send SR Number to search box
-    time.sleep(5)
-    eQuestSearchBox = BrowserControl.driver.find_element(By.XPATH, "//input[@id='search-input']") 
-    eQuestSearchBox.click()
-    time.sleep(1)
-    # Would do the same thing but that didn't work.
-    BrowserControl.actions.send_keys(TrueSRNum)
-    BrowserControl.actions.perform()
+    BrowserControl.CommitActionOnElement("//input[@id='search-input']","Clicking and Inputting",MessageAfterClick=TrueSRNum) # Press Details Box
     print("Sent SR Number")
     BrowserControl.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"results-list"))) # Wait for page to load.
+    print("Found Results List")
+    time.sleep(1)
     ResultsList = BrowserControl.driver.find_element(By.CLASS_NAME,"results-list")
     while ResultsList.text.replace(" ","") == "": # Wait until results show
         ResultsList = BrowserControl.driver.find_element(By.CLASS_NAME,"results-list")
         pass
-    print("Found Results List")
     BrowserControl.actions.send_keys("\n") # Press enter to go to page.
     BrowserControl.actions.perform()
-    BrowserControl.wait.until(EC.presence_of_element_located((By.XPATH, "//span[text()='Details']"))) # Wait for page to load.
-    time.sleep(2)
-
-# Function to click,send something to, or grab text from element
-# Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
 
 # Pretty much the last function of the program, attach the pdf
 def NotifySupport(PDFFilePath,SRNum):
     # Attaching doc
     BrowserControl.CommitActionOnElement("//span[text()='Details']","Clicking") # Press Details Box
     BrowserControl.CommitActionOnElement("//button[text()='Attachments']","Clicking") # Press Attachments button
-    BrowserControl.CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True) # Send file
-    time.sleep(3)
+    BrowserControl.CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True,Delay=3) # Send file
     BrowserControl.CommitActionOnElement("//button[text()='Close']","Clicking") # Send file
     
     # Getting Support Person's name
     BrowserControl.CommitActionOnElement("//span[text()='Activity']","Clicking") # Click Activity Box
-    SupportPersonName = BrowserControl.CommitActionOnElement("//img[@class='img-circle img-avatar img-extra-data ng-scope ev-avatar']","Text Grab") # Click Activity Box
+    SupportPersonName = BrowserControl.CommitActionOnElement("//img[@class='img-circle img-avatar img-extra-data ng-scope ev-avatar']","Grab Text") # Click Activity Box
     # We're getting from the first img alt since that'll be the support person
     print(f"The support person is {SupportPersonName}")
 
@@ -54,7 +43,6 @@ def NotifySupport(PDFFilePath,SRNum):
     with open(f"{config.CurrentPath}\\CustomTags.txt","r") as file:
         eQuestCustomTags = file.read()
     BrowserControl.actions.send_keys(f"Hello, {SupportPersonName}. Please see the Aramark invoice for {SRNum} attached for payment processing.\n\nThanks,\nJay\n\n{eQuestCustomTags}").perform()
-    time.sleep(1000) # Wait for allat to send
     BrowserControl.CommitActionOnElement("//button[text()='Finish']","Clicking") # Press Finish Buttion
     
     # Changing the status of the ticket

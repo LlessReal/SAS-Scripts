@@ -39,12 +39,8 @@ def PrepareAdobePDFFile(AramarkInvoice):
             break # else the scan is finished
 
 def OnlineOCR(AramarkInvoice):
-    wait = WebDriverWait(BrowserControl.driver,300)
     BrowserControl.driver.get("https://www.onlineocr.net/")
-    wait.until(EC.presence_of_element_located((By.XPATH, "//input[@id='fileupload']")))
-    sleep(1)
-    FileDrop = BrowserControl.driver.find_element(By.XPATH, "//input[@id='fileupload']") 
-    FileDrop.send_keys(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
+    BrowserControl.CommitActionOnElement("//input[@id='fileupload']",f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
 
     # Select box (no wait)
     select = Select(BrowserControl.driver.find_element(By.XPATH, "//select[@id='MainContent_comboOutput']"))
@@ -55,9 +51,7 @@ def OnlineOCR(AramarkInvoice):
     ConvertButton.click()
 
     # Getting Output text
-    wait.until(EC.presence_of_element_located((By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']")))
-    OutputArea = BrowserControl.driver.find_element(By.XPATH, "//textarea[@id='MainContent_txtOCRResultText']") 
-    return OutputArea.text
+    return BrowserControl.CommitActionOnElement("//textarea[@id='MainContent_txtOCRResultText']","Grab Text")
 
 def GetPDFText(AramarkInvoice,Method):
     print("Grabbing text from documents...")
@@ -65,13 +59,13 @@ def GetPDFText(AramarkInvoice,Method):
     if Method == "Adobe":
         Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
         for page in Reader.pages: # Goes through each page of document
-            TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc
+            TextGathered += page.extract_text() # Stores all text from the page
         if TextGathered == "": # if no text was gather
             PrepareAdobePDFFile(AramarkInvoice) # Perform text recognition in adobe
             # Redo
-            Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}") # Gets pdf file
-            for page in Reader.pages: # Goes through each page of document
-                TextGathered += page.extract_text() # Stores all text from the page intos AllTextFromDoc      
+            Reader = PdfReader(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}")
+            for page in Reader.pages: 
+                TextGathered += page.extract_text()     
             print("PDF is now text-readable by PyPDF!" if TextGathered != "" else "Mission Failed.")
     elif Method == "Online":
         TextGathered = OnlineOCR(AramarkInvoice)
@@ -92,7 +86,7 @@ def ReadFiles():
             All6DigitNums = re.findall(r'3\d{5}', AllTextFromInvoice)
             print(f"All 6 Digit Numbers that start with 3: {All6DigitNums}")
             for Num in All6DigitNums: # Go through each 3 digit number
-                if AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit(): # If it's some different number
+                if AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit(): # If it's some irrelevant number
                     All6DigitNums.remove(Num) 
             print(f"Cleaned list without unrelated numbers: {All6DigitNums}")
             if All6DigitNums == []:
@@ -113,8 +107,8 @@ def ReadFiles():
                 print("We did it !! - Dora !!")
                 # Put in Success folder
                 os.rename(f"{config.CurrentPath}\\Aramark Invoices\\{AramarkInvoice}",f"{config.CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRName}.pdf")
-                # Loop occurs
-    else: # If we are testing
+                # LOOP
+    else: # If we're testing
         SRNum = "SR327971"
         # No renaming
         eQuestBrowsing.SearchSRNum(SRNum)

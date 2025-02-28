@@ -32,14 +32,13 @@ def MyCSUAutoLogin():
     wait.until(EC.title_contains("MyCSU"))
     eQuestMainPage()
 
+# eQuest main page
 def eQuestMainPage():
     driver.get("https://csuequest.easyvista.com/") # Open eQuest Service Manager Main Page
-    # Wait till Search Box
-    wait.until(EC.presence_of_element_located((By.XPATH,"//input[@id='search-input']")))
-    # Program begins.
-    time.sleep(1)
 
-def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False):
+# Function to click,send something to, or grab text from element
+# Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
+def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False,Delay=0):
     if SwappingToIframe:
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
         iframe = driver.find_element(By.TAG_NAME, "iframe")  # Adjust selector
@@ -51,8 +50,8 @@ def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltA
     ElementChosen = driver.find_element(By.XPATH, Element)
     print(f"{Element} found. Committing action in a sec...")
     time.sleep(1)
-    if Action == "Text Grab":
-        time.sleep(1)
+    if Action == "Grab Text":
+        time.sleep(Delay)
         return ElementChosen.get_attribute("alt")
     
     if AltElement != "": # If we're dooing another element
@@ -81,3 +80,4 @@ def CommitActionOnElement(Element,Action,eQuestDropDown=False,AltElement="",AltA
         time.sleep(0.5)
         actions.send_keys(Keys.ENTER).perform()
         time.sleep(1)
+    time.sleep(Delay)
