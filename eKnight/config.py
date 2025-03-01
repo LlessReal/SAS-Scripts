@@ -1,11 +1,8 @@
-import os
+import os, main
 
-MyCSUUser = ""
-MyCSUPassword = ""
-PDFRecognitionMethod = "Testing" # Adobe or Online
+MyCSUUser, MyCSUPassword = "", "" # User, Password
+PDFRecognitionMethod = "Online" # Adobe, Online
+TestingProgram = True
 # Post Config shit
-CurrentPath = os.path.dirname(__file__)
-AramarkInvoices = os.listdir(f"{CurrentPath}\\Aramark Invoices") # Gets all documents from the documents folder
-for file in AramarkInvoices:
-    if "pdf" not in file: # Ignore folders and non-files
-        AramarkInvoices.remove(file) # Remove it from list pretty much
+# Gets all PDF documents from the Aramark Invoices folder
+AramarkInvoices = [f"{main.CurrentPath}\\Aramark Invoices\\{Invoice}" for Invoice in os.listdir(f"{main.CurrentPath}\\Aramark Invoices") if "pdf" in Invoice] 

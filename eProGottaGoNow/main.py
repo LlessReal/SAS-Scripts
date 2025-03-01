@@ -1,7 +1,7 @@
+import pyautogui as pya
 import keyboard, threading
 import pyperclip as pc
-import os, Tools.BrowserControl
-import BoxManipulation, Tools.PDFReader, time, config
+import config, BoxManipulation, time, os
 running = True
 
 CurrentPath = os.path.dirname(__file__) 
@@ -22,7 +22,7 @@ def main():
         
         if ReqID == "Empty":
             print("Empty Box")
-            Tools.BrowserControl.QuickPress("Down") # Next, no coloring
+            pya.press("down") # Next, no coloring
             EmptyCounter += 1
             if EmptyCounter == 10:
                 print("10 Empty Boxes detected, stopping program")
@@ -34,7 +34,7 @@ def main():
 
         # If the box was Unknown
         if ReqID == "Unknown":
-            BoxManipulation.MarkUnknown() # Mark unknown
+            BoxManipulation.MarkUnknown()
             continue
 
         if ReqID == "Cool Down":
@@ -57,7 +57,7 @@ def main():
         
         # Moving to N/A Box (If previous stage went good)
         BoxManipulation.MoveBoxes("N/A")
-        Tools.BrowserControl.QuickPress("Copy") # Copies box from N/A Column
+        pya.hotkey("ctrl","c") # Copies box from N/A Column
         time.sleep(0.5) # Same reason as b4
         if pc.paste() == "N/A" or "SR" in pc.paste(): # If already marked as N/A or if a SR number is in it already
             BoxManipulation.MoveBoxes("Req ID") # Next Req ID
@@ -67,8 +67,17 @@ def main():
             if SRSearch == "No SR": # If no SR was deemed to be found
                 BoxManipulation.MarkNA() # Mark as N/A
             elif SRSearch == "SR Found": # If SR was found
+                # Get current color fro mfile
+                with open(f"{CurrentPath}\\NextColor.txt","r") as f:
+                    CurrentColor = f.read()
+                # Write next color name
+                with open(f"{CurrentPath}\\NextColor.txt","w") as f2:
+                    try: # Tries to write down the next color
+                        f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1])
+                    except: # Resets if at max
+                        f2.write(config.AllColors[0])
+            
                 BoxManipulation.AddSRNum(ReqID) # Add the SR Number (need to the Req ID to do so)
-                BoxManipulation.ChangeColor()
             FormerReqID = f"{ReqID} (SR Found)" if SRSearch == "SR Found" else f"{ReqID} (No SR Found)"
             # Next Req ID
             BoxManipulation.MoveBoxes("Req ID")
@@ -86,11 +95,10 @@ def start_function():
 def stop_function():
     global running
     running = False
-    
-Tools.BrowserControl.MyCSUAutoLogin(config.MyCSUUser,config.MyCSUPassword,TargetWebsite="Excel",URL=config.ExcelDocURL)
+
 while True:
     try:
-        print("Click the first box, then press ctrl+shift+f to commense and press ctrl+shift+v to stop.")
+        print("Click the first box, then Press ctrl+shift+f to commense and press ctrl+shift+v to stop.")
         keyboard.add_hotkey("ctrl+shift+f", start_function)
         keyboard.add_hotkey("ctrl+shift+v", stop_function)
         keyboard.wait()

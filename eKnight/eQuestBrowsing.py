@@ -1,52 +1,54 @@
-import time, BrowserControl, config
+import time, config, Tools.BrowserControl, main
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys # Needed for sending keys
 
-# Put SR Number in the search
-def SearchSRNum(TrueSRNum):    
-    # Send SR Number to search box
-    BrowserControl.CommitActionOnElement("//input[@id='search-input']","Clicking and Inputting",MessageAfterClick=TrueSRNum,SuccessMessage="Sent SR Number") # Press Details Box
-    BrowserControl.wait.until(EC.presence_of_element_located((By.CLASS_NAME,"results-list"))) # Wait for page to load.
-    print("Found Results List")
-    time.sleep(1)
-    ResultsList = BrowserControl.driver.find_element(By.CLASS_NAME,"results-list")
-    while ResultsList.text.replace(" ","") == "": # Wait until results show
-        ResultsList = BrowserControl.driver.find_element(By.CLASS_NAME,"results-list")
+# Search SR Number after page loads
+def SearchSRNum(SRNum):   
+    Tools.BrowserControl.CommitActionOnElement("//span[text()='Welcome to the Production Service Manager Technician Portal!']",SwappingToIframe=True)  
+    Tools.BrowserControl.CommitActionOnElement("//input[@id='search-input']","ClickElement,InputtingElement",MessageAfterClick=f"SR{SRNum}",SuccessMessage="Sent SR Number") 
+    # Wait for results list to have text/SR Numbers
+    while Tools.BrowserControl.driver.find_element(By.XPATH,"//div[@class='results-list']").text.replace(" ","") == "": 
+        time.sleep(0.25)
         pass
-    BrowserControl.actions.send_keys("\n").perform() # Press enter to go to page.
+    Tools.BrowserControl.QuickPress("Enter")
 
 # Pretty much the last function of the program, attach the pdf
-def NotifySupport(PDFFilePath,SRNum):
-    # Attaching doc
-    BrowserControl.CommitActionOnElement("//span[text()='Details']","Clicking") # Press Details Box
-    BrowserControl.CommitActionOnElement("//button[text()='Attachments']","Clicking") # Press Attachments button
-    BrowserControl.CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True,Delay=3) # Send file
-    BrowserControl.CommitActionOnElement("//button[text()='Close']","Clicking") # Send file
-    
+
+# Function to attach PDF to ticket
+def AttachPDFtoTicket(PDFFilePath):
+    Tools.BrowserControl.CommitActionOnElement("//span[text()='Details']","ClickElement") # Press Details Box
+    Tools.BrowserControl.CommitActionOnElement("//button[text()='Attachments']","ClickElement") # Press Attachments button
+    Tools.BrowserControl.CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True,Delay=3) # Send file
+    Tools.BrowserControl.CommitActionOnElement("//button[text()='Close']","ClickElement") # Send file
+
+def NotifySupport(SRNum):   
     # Getting Support Person's name
-    BrowserControl.CommitActionOnElement("//span[text()='Activity']","Clicking") # Click Activity Box
-    SupportPersonName = BrowserControl.CommitActionOnElement("//img[@class='img-circle img-avatar img-extra-data ng-scope ev-avatar']","Grab Text",TypeOfItem="Support Person") # Click Activity Box
+    Tools.BrowserControl.CommitActionOnElement("//span[text()='Activity']","ClickElement") # Click Activity Box
+    SupportPersonName = Tools.BrowserControl.CommitActionOnElement("//img[@class='img-circle img-avatar img-extra-data ng-scope ev-avatar']","Grab Alt Text",TypeOfItem="Support Person") # Click Activity Box
     # We're getting from the first img alt since that'll be the support person
 
     # Committing Log Activity
-    BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.log_activity']","Clicking") 
-    BrowserControl.CommitActionOnElement("//input[@id='eventcombo-ui']","_Internal Update_",eQuestDropDown=True,SwappingToIframe=True) # Selecting Type of Message/Alert or whatever
-    BrowserControl.CommitActionOnElement("//span[@class='form_input_undefined']","Clicking and Inputting",MessageAfterClick=SupportPersonName,eQuestDropDown=True,SwappingToIframe=True) # Selecting Support Specialist as the contact
+    Tools.BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.log_activity']","ClickElement") 
+    Tools.BrowserControl.CommitActionOnElement("//input[@id='eventcombo-ui']","_Internal Update_",eQuestDropDown=True,SwappingToIframe=True) # Selecting Type of Message/Alert or whatever
+    Tools.BrowserControl.CommitActionOnElement("//span[@class='form_input_undefined']","ClickElement, InputtingElement",MessageAfterClick=SupportPersonName,eQuestDropDown=True,SwappingToIframe=True) # Selecting Support Specialist as the contact
     
     # Sending message
-    BrowserControl.CommitActionOnElement("//button[text()='Send Email & Finish']","Clicking") # Press "Send Email & Finish"
-    BrowserControl.CommitActionOnElement("//iframe[@title='Rich Text Area']","Clicking",SwappingToIframe=True)
-    BrowserControl.actions.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
-    eQuestCustomTags = open(f"{config.CurrentPath}\\CustomTags.txt","r").read() 
+    Tools.BrowserControl.CommitActionOnElement("//button[text()='Send Email & Finish']","ClickElement") # Press "Send Email & Finish"
     # Putting Email Message
-    BrowserControl.actions.send_keys(f"Hello, {SupportPersonName}. Please see the Aramark invoice for {SRNum} attached for payment processing.\n\nThanks,\nJay\n\n{eQuestCustomTags}").perform()
-    BrowserControl.CommitActionOnElement("//button[text()='Finish']","Clicking") # Press Finish Buttion
+    eQuestCustomTags = open(f"{main.CurrentPath}\\CustomTags.txt","r").read() 
+    SupportMessage = f"Hello, {SupportPersonName}. Please see the Aramark invoice for SR{SRNum} attached for payment processing.\n\nThanks,\nJay\n\n{eQuestCustomTags}"
+    Tools.BrowserControl.CommitActionOnElement("//iframe[@title='Rich Text Area']","ClickElement, InputtingElement, ResetElement",SwappingToIframe=True,MessageAfterClick=SupportMessage)
+    if not config.TestingProgram:
+        Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement",Delay=3) # Press Finish Buttion
+    else: 
+        Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
     
     # Changing the status of the ticket
-    BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.hold_reopen']","Clicking") # Click Reopen Button
-    BrowserControl.CommitActionOnElement("//textarea[@id='comment']","Ready For Processing.",SwappingToIframe=True) # Make a comment / Reopen Message
-    BrowserControl.CommitActionOnElement("//button[text()='Finish']","Clicking") # Press the finish button
+    Tools.BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.hold_reopen']","ClickElement") # Click Reopen Button
+    Tools.BrowserControl.CommitActionOnElement("//textarea[@id='comment']","Ready For Processing.",SwappingToIframe=True) # Make a comment / Reopen Message
+    if not config.TestingProgram:
+        Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement") # Press Finish Buttion
+    else: 
+        Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
 
     # Doneso
-    BrowserControl.eQuestMainPage()
+    Tools.BrowserControl.eQuestMainPage()

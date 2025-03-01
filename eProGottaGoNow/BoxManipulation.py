@@ -1,11 +1,10 @@
+import pyautogui as pya
 import pyperclip as pc
-import config, time, re, Tools.BrowserControl, Tools.PDFReader
-# Selenium
-from selenium.webdriver.common.keys import Keys # Needed for sending keys
+import keyboard, time, re, config, Tools.PDFReader
 
 AllTextFromeProDoc = "" # Extract text from each page
 for eProDoc in config.eProDocs: # Goes through each document in the list of documents you placed
-    AllTextFromeProDoc += Tools.PDFReader.GetPDFText(eProDoc,"Adobe",ShowText=True,CurrentPath=config.CurrentPath)
+    AllTextFromeProDoc += Tools.PDFReader.GetPDFText(eProDoc,"Adobe",ShowText=True)
 # we're reading all the pages from each doc ya 
 
 # Check if text grabbed is still empty
@@ -14,22 +13,20 @@ if AllTextFromeProDoc == "":
 
 # Function to fill color
 def FillColor(Down,Right):
-    Tools.BrowserControl.actions.send_keys(Keys.ALT).perform()
-    Tools.BrowserControl.actions.send_keys("hh").perform()
+    pya.press('alt')
+    keyboard.write("hh") # Alt + H + H
     time.sleep(0.5) # Wait a bit for box to load
-    Tools.BrowserControl.QuickPress("Enter")
+    pya.press('down') # Initialize selection
     for Downs in range(Down):
-        Tools.BrowserControl.QuickPress("Down")
-        time.sleep(0.25)
+        pya.press('down') # Goes down depending on how much called
     for Rights in range(Right):
-        Tools.BrowserControl.QuickPress("Right")
-        time.sleep(0.25)
+        pya.press('right') # Goes right depending on how much called
     time.sleep(0.5)
-    Tools.BrowserControl.QuickPress("Enter")
+    pya.press('enter') # Confirms color selection
 
 # Parses out ReqID and copies it
 def GrabReqID():
-    Tools.BrowserControl.QuickPress("Copy") # Copies Req ID Column text
+    pya.hotkey("ctrl","c") # Copies Req ID Column text
     time.sleep(0.5) # Wait a sec to process, or else it stores "gain" for some goddamn reason
     ReqIDColumnText = pc.paste()
     if ReqIDColumnText.replace(" ","") == "":
@@ -47,15 +44,15 @@ def GrabReqID():
 
 # Marks box as N/A
 def MarkNA(): # Put in coordinates of where the N/A should be written
-    Tools.BrowserControl.actions.send_keys(f"N/A\n").perform() 
-    Tools.BrowserControl.QuickPress("Up")  # Goes back to OG box
+    keyboard.write("N/A\n") # Puts in Req ID and paste it (with enter)
+    pya.press('up') # Goes back to OG box
     FillColor(6,1) # Marks red
 
 def MarkUnknown():
     print("Unknown Box.")
     MoveBoxes("N/A") # Goes to N/A Box
-    Tools.BrowserControl.actions.send_keys(f"Unknown\n").perform() 
-    Tools.BrowserControl.QuickPress("Up")
+    keyboard.write("Unknown\n")
+    pya.press('up')
     MoveBoxes("Req ID") # Goes to N/A Box
     FillColor(6,0) # Marks dark red
 
@@ -64,9 +61,10 @@ def AddSRNum(ReqID):
     AllTextAfterReqID = AllTextFromeProDoc[AllTextFromeProDoc.find(ReqID):] # Gets Req ID and text in front of it
     SRNumberGotten = re.findall(r"SR\d{6}",AllTextAfterReqID)
     SRNumber = SRNumberGotten[0] 
-    Tools.BrowserControl.actions.send_keys(f"{SRNumber}\n").perform() 
-    Tools.BrowserControl.QuickPress("Up")
-    CurrentColor = open(f"{config.CurrentPath}\\NextColor.txt","r").read()
+    keyboard.write(SRNumber + "\n")
+    pya.press('up') 
+    with open(f"{config.CurrentPath}\\NextColor.txt","r") as f:
+        CurrentColor = f.read()
     ColorDict = {
         "Orange": [6,2],
         "Yellow": [6,3],
@@ -80,28 +78,19 @@ def AddSRNum(ReqID):
 def MoveBoxes(BoxTarget=""):
     if BoxTarget == "N/A": # if we're moving to the N/A box
         for Box in range(config.ColumnDistance): # Gets distance to travel
-            Tools.BrowserControl.QuickPress("Right" if config.ReqIDColumnOnTheLeft else "Left")
+            pya.press('right' if config.ReqIDColumnOnTheLeft else 'left')
             # Go right to the N/A box if Req ID is on the left
     elif BoxTarget == "Req ID": # If we're moving to the Req ID box
-        Tools.BrowserControl.QuickPress("Down")
+        pya.press("down")
         for Box in range(config.ColumnDistance): 
-            Tools.BrowserControl.QuickPress("Left" if config.ReqIDColumnOnTheLeft else "Right")
+            pya.press('left' if config.ReqIDColumnOnTheLeft else 'right')
             # Go left to the Req ID Box if N/A Box is to the right of the Req ID
 
 def CopyAbove():
-    Tools.BrowserControl.QuickPress("Up")
-    Tools.BrowserControl.QuickPress("Copy")
-    Tools.BrowserControl.QuickPress("Down")
-    Tools.BrowserControl.QuickPress("Paste")
-
-def ChangeColor():
-    # Get current color fro mfile
-    with open(f"{config.CurrentPath}\\NextColor.txt","r") as f:
-        CurrentColor = f.read()
-    # Write next color name
-    with open(f"{config.CurrentPath}\\NextColor.txt","w") as f2:
-        f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1] if config.AllColors.index(CurrentColor) + 1 != len(config.AllColors) else config.AllColors[0])
-
+    pya.press("up")
+    pya.hotkey("ctrl","c")
+    pya.press("down")
+    pya.hotkey("ctrl","v")
 
 # Function that checks if the Req ID is in the document
 def CheckForSRNum(ReqID):
