@@ -110,8 +110,7 @@ def RepeatPlease(StartingProgram=False,SayMessage=0):
     if StartingProgram:
         print("Program hasn't started yet")
         return # Do nothing
-    if SayMessage == 1:
-        SoundFunctions.playVoiceLine("Repeat")
+    if SayMessage == 1: SoundFunctions.playVoiceLine("Repeat")
     GetCallersMessage()
 
 # Change the Input Device on Microsoft Teams Call

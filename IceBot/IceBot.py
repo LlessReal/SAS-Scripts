@@ -13,8 +13,5 @@ def main():
     GuiMaker.makeTransferGui(Reset=False,StartingProgram=True) 
 
 if __name__ == '__main__':
-    try:
-        main() 
-    except Exception as e:
-        print("The program broke L", e) # Self-Explanatory
-        # Below sets input device back to regular mic
+    try: main() 
+    except Exception as e: print("The program broke L", e) # Self-Explanatory

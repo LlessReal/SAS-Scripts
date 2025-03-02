@@ -48,8 +48,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
     CustomSoundLabel = Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
     CustomSoundLabel.grid(row=1 + NextInLine,column=1)
     for CustomSound in CustomSounds:
-        if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0:
-            NextInLine += 1 
+        if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0: NextInLine += 1 
         CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=False)) # Seperates the numbers
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
@@ -131,8 +130,7 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
 
     # Testing Bot Mode
     
-    if StartingProgram:
-        TestingBotToggle.set(0)
+    if StartingProgram: TestingBotToggle.set(0)
     TestingBotToggleBox = Checkbutton(root, text="Testing Bot",variable=TestingBotToggle,state= "disabled" if not StartingProgram else "normal") 
     TestingBotToggleBox.grid(row=9 + NextInLine,column=2)
     global InitiationThread
