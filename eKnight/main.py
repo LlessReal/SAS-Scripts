@@ -24,8 +24,8 @@ def main():
             print(f"{FullSRNameMaybe} is the full SR name (maybe), file will be renamed to that.")
             os.rename(AramarkInvoice,f"{CurrentPath}\\Aramark Invoices\\{FullSRNameMaybe}.pdf")
             eQuestBrowsing.SearchSRNum(SRNum)
-            eQuestBrowsing.AttachPDFtoTicket(f"{CurrentPath}\\Aramark Invoices\\{FullSRNameMaybe}.pdf")
-            eQuestBrowsing.NotifySupport(SRNum)
+            AttachPDFStatus = eQuestBrowsing.AttachPDFtoTicket(f"{CurrentPath}\\Aramark Invoices\\{FullSRNameMaybe}.pdf")
+            if AttachPDFStatus != "Already Closed": eQuestBrowsing.NotifySupport(SRNum)
             print("We did it !! - Dora !!") # Put in Success folder
             os.rename(f"{CurrentPath}\\Aramark Invoices\\{FullSRNameMaybe}.pdf",f"{CurrentPath}\\Aramark Invoices\\Successfully Sent\\{FullSRNameMaybe}.pdf")
             # LOOP

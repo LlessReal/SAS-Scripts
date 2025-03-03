@@ -16,9 +16,15 @@ def SearchSRNum(SRNum):
 # Function to attach PDF to ticket
 def AttachPDFtoTicket(PDFFilePath):
     Tools.BrowserControl.CommitActionOnElement("//span[text()='Details']","ClickElement") # Press Details Box
+    try:
+        Tools.BrowserControl.driver.find_element("//span[text()='Closed']") # If ticket is closed ignore the ticket
+        Tools.BrowserControl.eQuestMainPage()
+        return "Already Closed"
+    except: pass
     Tools.BrowserControl.CommitActionOnElement("//button[text()='Attachments']","ClickElement") # Press Attachments button
     Tools.BrowserControl.CommitActionOnElement("//input[@id='file_to_upload']",PDFFilePath,SwappingToIframe=True,Delay=3) # Send file
     Tools.BrowserControl.CommitActionOnElement("//button[text()='Close']","ClickElement") # Send file
+    return "Success"
 
 def NotifySupport(SRNum):   
     # Getting Support Person's name
