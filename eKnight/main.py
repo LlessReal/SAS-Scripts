@@ -11,8 +11,7 @@ def main():
         # Find all 6 digit numbers that starts with 3 in the document
         PotentialSRNumbers = [Num for Num in re.findall(r'3\d{5}', AllTextFromInvoice) if not AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit()]
         print(f"All 6 Digit Numbers that start with 3: {PotentialSRNumbers}" if PotentialSRNumbers != [] else "We got nothin")
-        if len(PotentialSRNumbers) > 1: 
-            CorrectNum = int(input("Found multiple 6-digit numbers that start with 3, check the Invoice to see which is the correct one"))
+        if len(PotentialSRNumbers) > 1: CorrectNum = int(input("Found multiple 6-digit numbers that start with 3, check the Invoice to see which is the correct one"))
         # If it's empty, put it in Failures folder
         if PotentialSRNumbers == []:  os.rename(AramarkInvoice,AramarkInvoice.replace("\\Aramark Invoices\\","\\Aramark Invoices\\Failure\\"))
         else:

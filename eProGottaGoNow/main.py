@@ -13,8 +13,7 @@ def main():
     FormerReqID = ""
     while running:
         # Check Former Req ID
-        if FormerReqID != "":
-            print(f"Former ID was {FormerReqID}")  
+        if FormerReqID != "": print(f"Former ID was {FormerReqID}")  
 
         # You better have clicked a box at this point
         # Grab Req ID

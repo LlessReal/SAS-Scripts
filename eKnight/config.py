@@ -1,6 +1,6 @@
 import os, main
 
-MyCSUUser,MyCSUPassword = "marshall_miguel@columbusstate.edu", "Ll3ss1@3$5^Ll3ss1@3$5^"
+MyCSUUser,MyCSUPassword = "", ""
 PDFRecognitionMethod = "NewOCR" # Adobe, OnlineOCR, NewOCR 
 # honorable (not rlly) mentions: https://www.adobe.com/acrobat/online/ocr-pdf.html , https://www.ocr2edit.com/
 TestingProgram = False
