@@ -52,5 +52,4 @@ def NotifySupport(SRNum):
     if not config.TestingProgram: Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement") # Press Finish Buttion
     else: Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
 
-    # Doneso
-    Tools.BrowserControl.eQuestMainPage()
+    Tools.BrowserControl.eQuestMainPage() # Doneso
