@@ -1,6 +1,6 @@
 import os, main
 
-MyCSUUser,MyCSUPassword = "marshall_miguel@columbusstate.edu", "Ll3ss1@3$5^Ll3ss1@3$5^" # User, Password
+MyCSUUser,MyCSUPassword = "", "" # User, Password
 PDFRecognitionMethod = "Adobe" # Adobe, Online
 TestingProgram = False
 # Post Config shit
