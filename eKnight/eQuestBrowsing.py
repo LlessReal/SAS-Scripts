@@ -37,18 +37,14 @@ def NotifySupport(SRNum):
     eQuestCustomTags = open(f"{main.CurrentPath}\\CustomTags.txt","r").read() 
     SupportMessage = f"Hello, {SupportPersonName}. Please see the Aramark invoice for SR{SRNum} attached for payment processing.\n\nThanks,\nJay\n\n{eQuestCustomTags}"
     Tools.BrowserControl.CommitActionOnElement("//iframe[@title='Rich Text Area']","ClickElement, InputtingElement, ResetElement",SwappingToIframe=True,MessageAfterClick=SupportMessage)
-    if not config.TestingProgram:
-        Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement",Delay=3) # Press Finish Buttion
-    else: 
-        Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
+    if not config.TestingProgram: Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement",Delay=3) # Press Finish Buttion
+    else: Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
     
     # Changing the status of the ticket
     Tools.BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.hold_reopen']","ClickElement") # Click Reopen Button
     Tools.BrowserControl.CommitActionOnElement("//textarea[@id='comment']","Ready For Processing.",SwappingToIframe=True) # Make a comment / Reopen Message
-    if not config.TestingProgram:
-        Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement") # Press Finish Buttion
-    else: 
-        Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
+    if not config.TestingProgram: Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement") # Press Finish Buttion
+    else: Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
 
     # Doneso
     Tools.BrowserControl.eQuestMainPage()

@@ -31,17 +31,11 @@ def MyCSUAutoLogin(MyCSUUser,MyCSUPassword,TargetWebsite="",URL=""):
     
     # Wait for page to load
     wait.until(EC.title_contains("MyCSU"))
-    if TargetWebsite == "eQuest":
-        eQuestMainPage()
-    elif TargetWebsite == "Excel":
-        openPage(URL)
 
-def openPage(URL):
-    driver.get(URL)
-
-# eQuest main page
-def eQuestMainPage():
-    driver.get("https://csuequest.easyvista.com/") # Open eQuest Service Manager Main Page
+def openPage(URL): driver.get(URL)
+def eQuestMainPage(MyCSUFirst=False): 
+    if MyCSUFirst: openPage("https://mycsu.columbusstate.edu/")
+    driver.get("https://csuequest.easyvista.com/") # eQuest main page
 
 # Function to click,send something to, or grab text from element
 # Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
@@ -60,8 +54,8 @@ def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",A
     time.sleep(1)
     if Action == "Grab Alt Text":
         time.sleep(Delay)
-        print(f"{TypeOfItem} - {ElementChosen.get_attribute("alt")}")
-        return ElementChosen.get_attribute("alt")
+        print(f"{TypeOfItem} - {ElementChosen.get_attribute('alt')}")
+        return ElementChosen.get_attribute('alt')
     
     if Action == "Grab Text":
         time.sleep(Delay)
@@ -93,8 +87,7 @@ def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",A
         time.sleep(1)
         actions.send_keys(Keys.ENTER).perform()
 
-    if SwappingToIframe:
-        driver.switch_to.default_content()
+    if SwappingToIframe: driver.switch_to.default_content()
     # If statement to turn back to main page was supposed to be here but it wasn't goddamn working for some reason
     time.sleep(1)
 
