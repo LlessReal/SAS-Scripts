@@ -11,15 +11,16 @@ def main():
         # Find all 6 digit numbers that starts with 3 in the document
         PotentialSRNumbers = [Num for Num in re.findall(r'3\d{5}', AllTextFromInvoice) if not AllTextFromInvoice[AllTextFromInvoice.find(Num):7].isdigit()]
         print(f"All 6 Digit Numbers that start with 3: {PotentialSRNumbers}" if PotentialSRNumbers != [] else "We got nothin")
-        if len(PotentialSRNumbers) > 1: input("Found 2 6-digit numbers that start with 3, check up on that")
+        if len(PotentialSRNumbers) > 1: 
+            CorrectNum = int(input("Found multiple 6-digit numbers that start with 3, check the Invoice to see which is the correct one"))
         # If it's empty, put it in Failures folder
         if PotentialSRNumbers == []:  os.rename(AramarkInvoice,AramarkInvoice.replace("\\Aramark Invoices\\","\\Aramark Invoices\\Failure\\"))
         else:
             # we got an SR Number, i think
-            SRNum = f"{PotentialSRNumbers[0]}"
+            SRNum = f"{PotentialSRNumbers[0 if not len(PotentialSRNumbers) > 1 else CorrectNum - 1]}"
             print(f"{SRNum} is the SR Number")                
             SRNumAndAllAfter = AllTextFromInvoice[AllTextFromInvoice.find(SRNum):]
-            FullSRNameMaybe = "SR" + SRNumAndAllAfter[0:SRNumAndAllAfter.find(" ")].replace(f"/","-")
+            FullSRNameMaybe = "SR" + SRNumAndAllAfter[0:SRNumAndAllAfter.find(" " if config.PDFRecognitionMethod == "OnlineOCR" else "\n")].replace(f"/","-")
             print(f"{FullSRNameMaybe} is the full SR name (maybe), file will be renamed to that.")
             os.rename(AramarkInvoice,f"{CurrentPath}\\Aramark Invoices\\{FullSRNameMaybe}.pdf")
             eQuestBrowsing.SearchSRNum(SRNum)

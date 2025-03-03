@@ -1,7 +1,8 @@
 import os, main
 
 MyCSUUser,MyCSUPassword = "", "" # User, Password
-PDFRecognitionMethod = "Adobe" # Adobe, Online
+PDFRecognitionMethod = "NewOCR" # Adobe, OnlineOCR, NewOCR 
+# honorable (not rlly) mentions: https://www.adobe.com/acrobat/online/ocr-pdf.html , https://www.ocr2edit.com/
 TestingProgram = False
 # Post Config shit
 # Gets all PDF documents from the Aramark Invoices folder

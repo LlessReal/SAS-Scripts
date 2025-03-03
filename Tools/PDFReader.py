@@ -50,6 +50,19 @@ def OnlineOCR(AramarkInvoice):
     # Getting Output text
     return Tools.BrowserControl.CommitActionOnElement("//textarea[@id='MainContent_txtOCRResultText']","Grab Text")
 
+
+def NewOCR(AramarkInvoice):
+    Tools.BrowserControl.driver.get("https://www.newocr.com/")
+    Tools.BrowserControl.CommitActionOnElement("//input[@id='userfile']",AramarkInvoice)
+    
+    PreviewButton = Tools.BrowserControl.driver.find_element(By.XPATH, "//button[@id='preview']") 
+    PreviewButton.click()
+
+    Tools.BrowserControl.CommitActionOnElement("//button[@id='ocr']","ClickElement") 
+    
+    return Tools.BrowserControl.CommitActionOnElement("//textarea[@id='ocr-result']","Grab Text") 
+
+
 def GetPDFText(PDFPath,Method,ShowText=False,CurrentPath=""):
     print("Grabbing text from documents...")
     TextGathered = ""
@@ -64,7 +77,8 @@ def GetPDFText(PDFPath,Method,ShowText=False,CurrentPath=""):
                 for page in Reader.pages: TextGathered += page.extract_text() 
                 sleep(1)    
         print("PDF is now text-readable by PyPDF!" if TextGathered != "" else "Mission Failed.")
-    elif Method == "Online": TextGathered = OnlineOCR(PDFPath)
+    elif Method == "OnlineOCR": TextGathered = OnlineOCR(PDFPath)
+    elif Method == "NewOCR": TextGathered = NewOCR(PDFPath)
     
     if ShowText: print(f"{TextGathered}\n\nReview above text")
     
