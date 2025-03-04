@@ -49,7 +49,7 @@ def NotifySupport(SRNum):
     # Changing the status of the ticket
     Tools.BrowserControl.CommitActionOnElement("//button[@ng-if='::data.form.extra.wizards.hold_reopen']","ClickElement") # Click Reopen Button
     Tools.BrowserControl.CommitActionOnElement("//textarea[@id='comment']","Ready For Processing.",SwappingToIframe=True) # Make a comment / Reopen Message
-    if not config.TestingProgram: Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement") # Press Finish Buttion
+    if not config.TestingProgram: Tools.BrowserControl.CommitActionOnElement("//button[text()='Finish']","ClickElement",DelayAfterWait=0) # Press Finish Buttion
     else: Tools.BrowserControl.CommitActionOnElement("//button[text()='Cancel']","ClickElement",AlertBox="Accept",Delay=3)
 
     Tools.BrowserControl.eQuestMainPage() # Doneso

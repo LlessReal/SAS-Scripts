@@ -1,7 +1,7 @@
 import os, main
 
 MyCSUUser,MyCSUPassword = "", ""
-PDFRecognitionMethod = "NewOCR" # Adobe, OnlineOCR, NewOCR 
+PDFRecognitionMethod = "NewOCR" # OnlineOCR, NewOCR 
 # honorable (not rlly) mentions: https://www.adobe.com/acrobat/online/ocr-pdf.html , https://www.ocr2edit.com/
 TestingProgram = False
 # Post Config shit

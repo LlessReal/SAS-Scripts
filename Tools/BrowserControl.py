@@ -39,13 +39,13 @@ def eQuestMainPage(MyCSUFirst=False):
 
 # Function to click,send something to, or grab text from element
 # Format: Element by XPATH, Action, eQuest Drop Down or not, and if there's an alternative element or nah
-def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False,Delay=0,SuccessMessage="Successfully Completed",TypeOfItem="",AlertBox=""):
+def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",AltAction="",SwappingToIframe=False,MessageAfterClick="",PressEnter=False,Delay=0,SuccessMessage="Successfully Completed",TypeOfItem="",AlertBox="",DelayAfterWait=1):
     if SwappingToIframe:
         wait.until(EC.presence_of_element_located((By.TAG_NAME, "iframe")))
         iframe = driver.find_element(By.TAG_NAME, "iframe")  # Adjust selector
         driver.switch_to.frame(iframe)
         print(f"Swapped to Iframe!")
-        time.sleep(1)
+        time.sleep(DelayAfterWait)
 
     wait.until(EC.presence_of_element_located((By.XPATH, Element)))
     ElementChosen = driver.find_element(By.XPATH, Element)
@@ -68,7 +68,7 @@ def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",A
         ElementChosen.send_keys(AltAction) if "ClickElement" not in AltAction else ElementChosen.click()
         if "InputtingElement" in AltAction:
             if "ResetElement" in Action:
-                QuickPress("a")
+                QuickPress("Select All")
                 time.sleep(0.25)
             actions.send_keys(MessageAfterClick).perform()
         
@@ -76,8 +76,7 @@ def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",A
         if Action != "":
             ElementChosen.send_keys(Action) if "ClickElement" not in Action else ElementChosen.click()   
             if "InputtingElement" in Action:
-                if "ResetElement" in Action:
-                    QuickPress("a")
+                if "ResetElement" in Action: QuickPress("Select All")
                 time.sleep(0.5)
                 actions.send_keys(MessageAfterClick).perform()
         else:
@@ -107,22 +106,13 @@ def CommitActionOnElement(Element,Action="",eQuestDropDown=False,AltElement="",A
 def QuickPress(ImportantKey,Limit=1):
     LimitCounter = 0
     while LimitCounter != Limit:
-        if ImportantKey == "Up":
-            actions.send_keys(Keys.ARROW_UP).perform()
-        elif ImportantKey == "Right":
-            actions.send_keys(Keys.ARROW_RIGHT).perform()
-        elif ImportantKey == "Down":
-            actions.send_keys(Keys.ARROW_DOWN).perform()
-        elif ImportantKey == "Left":
-            actions.send_keys(Keys.ARROW_LEFT).perform()
-        elif ImportantKey == "Enter":
-            actions.send_keys(Keys.ENTER).perform()
-        elif ImportantKey == "Copy":
-            actions.key_down(Keys.CONTROL).send_keys("c").key_up(Keys.CONTROL).perform()
-        elif ImportantKey == "Paste":
-            actions.key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
-        elif ImportantKey == "Cut":
-            actions.key_down(Keys.CONTROL).send_keys("x").key_up(Keys.CONTROL).perform()
-        elif ImportantKey == "Select All":
-            actions.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
+        if ImportantKey == "Up": actions.send_keys(Keys.ARROW_UP).perform()
+        elif ImportantKey == "Right":actions.send_keys(Keys.ARROW_RIGHT).perform()
+        elif ImportantKey == "Down":actions.send_keys(Keys.ARROW_DOWN).perform()
+        elif ImportantKey == "Left":actions.send_keys(Keys.ARROW_LEFT).perform()
+        elif ImportantKey == "Enter":actions.send_keys(Keys.ENTER).perform()
+        elif ImportantKey == "Copy":actions.key_down(Keys.CONTROL).send_keys("c").key_up(Keys.CONTROL).perform()
+        elif ImportantKey == "Paste":actions.key_down(Keys.CONTROL).send_keys("v").key_up(Keys.CONTROL).perform()
+        elif ImportantKey == "Cut":actions.key_down(Keys.CONTROL).send_keys("x").key_up(Keys.CONTROL).perform()
+        elif ImportantKey == "Select All":actions.key_down(Keys.CONTROL).send_keys("a").key_up(Keys.CONTROL).perform()
         LimitCounter += 1
