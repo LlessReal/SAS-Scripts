@@ -16,8 +16,7 @@ def PressIceButton(ImagePath,WaitMessage="",FailMessage="",TypeTransfer=False,Tr
             ButtonToBePressed = pya.locateOnScreen(ImagePath) # Finds transfer button, if it's not on screen, goes to except
             if TypeTransfer == False:
                 pya.click(ButtonToBePressed) # Click the button
-            else:
-                pya.write(f"{TransferNumber} \n") # Types number and then press enter
+            else: pya.write(f"{TransferNumber} \n") # Types number and then press enter
             sleep(1)
             return
         except:
@@ -62,7 +61,6 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
     pya.moveTo(InitialPosition) # # Go to OG position
     ResetState = GuiMaker.BackToStageOne(True)
 
-
 # Gets caller's message
 def getCallerMessage():   
     recognizer = sr.Recognizer() # Initiate Recognizer
@@ -71,24 +69,19 @@ def getCallerMessage():
     with microphone as source: # Gets mic to listen to
         while True:
             print("Now Listening to Caller.....")
-            try:
-                audio = recognizer.listen(source, timeout=5) # Listens to customer's yap
+            try: audio = recognizer.listen(source, timeout=30) # Listens to customer's yap
             except sr.WaitTimeoutError:
                 print("No message detected.")
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                 AskedtoSpeakAlready = True
-                if LeaveCallNotice == "Left the Call":
-                    return
-                else:
-                    continue
+                if LeaveCallNotice == "Left the Call": return
+                else: continue
             
             print("Stopped recording")
             try: # Try to save their message
-                with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file:
-                    file.write(audio.get_wav_data())
+                with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file: file.write(audio.get_wav_data())
                 print("Audio saved as CallersMessage.wav")
-            except Exception as e:
-                print(f"Unable to save audio somehow {e}")
+            except Exception as e: print(f"Unable to save audio somehow {e}")
             try: # Tries to transcribe audio
                 result = model.transcribe(fr"{CurrentPath}\Caller's Message\CallersMessage.wav",fp16=False, language='English')
                 with open(fr"{CurrentPath}\Caller's Message\CallersMessageTranscription.txt","w") as f:
@@ -98,19 +91,13 @@ def getCallerMessage():
                     print("No message detected.")
                     LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                     AskedtoSpeakAlready = True
-                    if LeaveCallNotice == "Left the Call":
-                        return
-                    else:
-                        continue
+                    if LeaveCallNotice == "Left the Call": return LeaveCallNotice
                 return result["text"] # Returns the transcript for the user
             except Exception as e:
                 print("Failed to recognize audio", e)
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                 AskedtoSpeakAlready = True
-                if LeaveCallNotice == "Left the Call":
-                    return
-                else:
-                    continue
+                if LeaveCallNotice == "Left the Call": return LeaveCallNotice
             
 
 # Function that asks caller to repeat what they said
@@ -119,6 +106,5 @@ def PleaseRepeat(AskedtoSpeakAlready):
         SoundFunctions.playVoiceLine("Goodbye") # Says good bye
         CloseWindow("(External)") # and closes the call window
         return "Left the Call"
-    else:
-        SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
+    else: SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
 # Make AskedtoSpeakAlready = True and add a continue after this function
