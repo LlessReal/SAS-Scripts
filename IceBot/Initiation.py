@@ -1,27 +1,18 @@
 import pyautogui as pya
 from time import sleep
-
-import IceBarFunctions
-from OtherFunctions import OpenWindow
-from config import CurrentPath, ModelName
-import GuiMaker, SoundFunctions, ollama, pyttsx3
+from config import CurrentPath
+import GuiMaker, SoundFunctions, pyttsx3, IceBarFunctions, SchizoRadio
 engine = pyttsx3.init() # Initialize the engine
-#Adjust speaking rate
-rate = engine.getProperty('rate')
-engine.setProperty('rate', 150) # Slowwww
-
-#Adjust volume
-engine.setProperty('volume', 1.0)
-
-#Change voice
-voices = engine.getProperty('voices')
-engine.setProperty('voice', voices[0].id)  # Selecting a female voice
+# Adjust speaking rate and volume
+engine.setProperty('rate', 150); engine.setProperty('volume', 1.0)
+# Change to male voice
+voices = engine.getProperty('voices'); engine.setProperty('voice', voices[0].id)
 
 from huggingface_hub import InferenceClient
 
 client = InferenceClient(
 	provider="novita",
-	#api_key=""
+	api_key=""
 )
 
 def StartFunction(TestingBot,StartingProgram):
@@ -29,8 +20,7 @@ def StartFunction(TestingBot,StartingProgram):
     if not StartingProgram:
         ###### PHASE 1 - Greeting
         if TestingBot: # If testing, will use regular mic, then go straight to general greeting
-            print("Testing Mode On. Program starts in 5 seconds")
-            sleep(5)
+            print("Testing Mode On. Program starts in 5 seconds"); sleep(5)
             ResetState = GuiMaker.BackToStageOne()
             if ResetState == "ResetGuiNow": return
             SoundFunctions.GeneralGreeting() # Good Morning/Afternoon and then the greeting
@@ -47,7 +37,7 @@ def StartFunction(TestingBot,StartingProgram):
                     pya.click(SomeoneCalling) # Clicks the button
                     break # Onto next stage
                 except Exception as e:
-                    if CallInactive == False:  print("Waiting for Answer Button to be active....") # This is so it won't be spammed.
+                    if CallInactive == False: print("Waiting for Answer Button to be active....") # This is so it won't be spammed.
                     CallInactive = True # needed to not make above message spam
                     sleep(0.1)
                     ResetState = GuiMaker.BackToStageOne()
@@ -75,8 +65,9 @@ def StartFunction(TestingBot,StartingProgram):
                     if ResetState == "ResetGuiNow": return
         
         ##### PHASE 2 - Grab Info From Caller
-        GetCallersMessage()
-
+        CallersMessage = IceBarFunctions.getCallerMessage() 
+        DetailsExplained = f"A caller has said the following message: {CallersMessage}\nRespond to the caller's message"
+        GenerateBotResponse(DetailsExplained)
 
 ### Message Context
 PhoneNumDetails = open(fr"{CurrentPath}\Details.txt","r", encoding='utf-8', errors='ignore').read()
@@ -84,10 +75,10 @@ SystemMessage = f"""You are a bot at Columbus State University meant to transfer
 You'll be transfering them from the numbers below. 
 if you're going to transfer them to a number, say, '[INITIATE TRANSFER - (The Number)]' AT THE VERY END of your response, and replace (The Number) with the actual number you're transfering them to of course.
 {PhoneNumDetails}"""
-def GetCallersMessage():
-    CallersWords = IceBarFunctions.getCallerMessage() 
-    DetailsExplained = f"A caller has said the following message: {CallersWords}\nRespond to the caller's message"
+
+def GenerateBotResponse(DetailsExplained):
     SoundFunctions.playVoiceLine("PleaseWait")
+    SchizoRadio.RadioControl("On")
     # Generate bot's response
     try:
         completion = client.chat.completions.create(
@@ -102,45 +93,21 @@ def GetCallersMessage():
                 ], 
             max_tokens=500,
         )
-        BotsResponse = completion.choices[0].message.content 
-    except Exception as e:
-        print(f"Error running Ollama: {e}")
-        return
-    
+        BotsResponse = completion.choices[0].message.content
+        # Remove Initiate Transfer Message
+        BotsResponse = BotsResponse.replace(BotsResponse[BotsResponse.find("[INITIATE"):],"")
+    except Exception as e: print(f"Error running bot {e}"); return
+    SchizoRadio.RadioControl("Off")
     print(f"Bot's Response: {BotsResponse}")
-    engine.say(BotsResponse) # Says the bot's response
-    engine.runAndWait()
-    engine.stop() # Stop the engine
+    # Says the bot's response and stop the engine after
+    
+    engine.say(BotsResponse); engine.runAndWait(); engine.stop() 
     # FINAL PHASE: Transfering
-    if CallersWords != "Left the Call": GuiMaker.makeTransferGui(TheCallersWords=CallersWords,BotsResponse=BotsResponse) 
+    if "INITIATE TRANSFER" in BotsResponse: 
+        IceBarFunctions.AutoTransferSubmitVersion(TransferNumber=BotsResponse[BotsResponse.find("- ") + 2:BotsResponse.find("]")],SayVoiceLine=GuiMaker.TransferLineToggle.get(),WaitBeforeGo=GuiMaker.WaitToggle.get())
 
 # Repeat
-def RepeatPlease(StartingProgram=False,SayMessage=0):
-    if StartingProgram:
-        print("Program hasn't started yet")
-        return # Do nothing
-    if SayMessage == 1: SoundFunctions.playVoiceLine("Repeat")
-    GetCallersMessage()
-
-# Change the Input Device on Microsoft Teams Call
-def MTeamsChangeInputDevice(Input):
-    try: OpenWindow("(External)") # Open the call window
-    except: return
-    sleep(0.5)
-    # Click the dropdown
-    try:
-        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
-        pya.click(MicrosoftDropDown)
-    except:
-        print("Couldn't find Microsoft Dropdown :(")
-        return
-    sleep(0.5)
-    # Click Headset, or Speakers, or Stereo Yk Yk
-    try:
-        if Input == "Headset": DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\HDAudio.png')
-        elif Input == "Speakers": DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\Speakers.png')
-        elif Input == "StereoMix": DeviceToTurnOn = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\StereoMix.png')
-        pya.click(DeviceToTurnOn)
-    except:
-        print("Couldn't find headset or speakers : (")
-        return
+def RepeatPlease(SayRepeatVoiceLine=0):
+    # Asks caller to repeat what they said if this is on
+    if SayRepeatVoiceLine == 1: SoundFunctions.playVoiceLine("Repeat")
+    CallersMessage = IceBarFunctions.getCallerMessage() 

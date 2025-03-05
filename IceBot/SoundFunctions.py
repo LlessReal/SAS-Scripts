@@ -1,8 +1,8 @@
 import pyautogui as pya
-import os, random, wave, pyaudio, pygame, datetime, subprocess
+import os, random, wave, pyaudio, pygame, datetime
 from config import VoicelineFolderName, CurrentPath 
 from pydub import AudioSegment # Play sound from soundboard
-from Initiation import MTeamsChangeInputDevice
+from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
 AudioSegment.converter = fr'{CurrentPath}\ffmpeg' # Change audio speed thing yeaaaaaa
 
 
@@ -14,9 +14,10 @@ def ChangeAudio(input_file_path, output_file_path, speed):
     """
     os.system(fr"ffmpeg -i {input_file_path} -filter:a atempo={speed} -vn {output_file_path}")
 
-def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
+def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine,ChannelPicked):
     SoundFolder = "Custom Sounds" if CharacterLine == False else VoicelineFolderName
     input_audio = fr"{CurrentPath}\{SoundFolder}\{SoundName}"
+    if ChannelPicked.get_busy(): ChannelPicked.stop(); return
     try:
         if BrainrotModeActivated:
             if SoundName.replace(".mp3"," Brainrot Edition.mp3") in os.listdir(fr"{CurrentPath}\Brainrot Audio Cache"):
@@ -26,10 +27,8 @@ def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
                 BrainrotSpeedSoFar = 8.0
                 AllAlteredAudios = []
                 for i in range(16):
-                    if i == 0:
-                        NewSoundName = SoundName.replace(".mp3",f" Brainrot Edition.mp3")
-                    else:
-                        NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
+                    if i == 0: NewSoundName = SoundName.replace(".mp3",f" Brainrot Edition.mp3")
+                    else: NewSoundName = SoundName.replace(".mp3",f" Altered {i}.mp3")
                     output_audio = fr"{CurrentPath}\Brainrot Audio Cache\{NewSoundName}"
                     ChangeAudio(input_audio, output_audio, speed=BrainrotSpeedSoFar) # Makes audio based on new slow tempo
                     BrainrotSpeedSoFar -= 0.5
@@ -43,19 +42,16 @@ def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine):
                     Sound1 += NextSound # need ffprobe for this to work, but add all the file together
                     os.remove(AlteredAudio) # Remove the files
                 Sound1.export(Sound1Name, format="mp3") # Makes the new file
-                
-            pygame.mixer.Sound(Sound1Name).play()
+            ChannelPicked.play(pygame.mixer.Sound(Sound1Name))    
  
         elif SpeedChange != 1.0:
             NewSoundName = SoundName.replace(".mp3"," Altered.mp3")
             output_audio = fr"{CurrentPath}\{SoundFolder}\{NewSoundName}"
             ChangeAudio(input_audio, output_audio, speed=SpeedChange)
-            pygame.mixer.Sound(output_audio).play()
+            ChannelPicked.play(pygame.mixer.Sound(output_audio))  
             os.remove(output_audio)
-        else:
-            pygame.mixer.Sound(input_audio).play()
-    except:
-        print("No sound found. (bars)")
+        else: ChannelPicked.play(pygame.mixer.Sound(input_audio))  
+    except: print("No sound found. (bars)")
     
 # Play a wav file instead of an mp3 file
 def PlayWaveFile(WavFile):
@@ -80,12 +76,9 @@ def playVoiceLine(VoicelineType):
     try:
         UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
         pya.click(UnMuteAvailable) # Unmute myself to hear caller  
-    except:
-        pass
-    try:
-        MTeamsChangeInputDevice("Speakers")
-    except:
-        pass
+    except: pass
+    try: MicrosoftTeamsChangeDevice("Speaking to Client")
+    except: pass
 
     AllVoicelines = [] # List Initialization
     for Voiceline in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}"): # Gets all files in the Voiceliens folder
@@ -93,24 +86,20 @@ def playVoiceLine(VoicelineType):
             AllVoicelines.append(os.path.join(fr"{CurrentPath}\{VoicelineFolderName}", Voiceline)) # Add it to the list
     try:
         RandomVoiceLineChosen = random.choice(AllVoicelines)
-        if "wav" in RandomVoiceLineChosen:
-            PlayWaveFile(random.choice(AllVoicelines))
-        else:
-            pygame.mixer.Sound(RandomVoiceLineChosen).play()
-    except:
-        print("Voiceline wasn't found.")
+        if "wav" in RandomVoiceLineChosen: PlayWaveFile(random.choice(AllVoicelines))
+        else: pygame.mixer.Sound(RandomVoiceLineChosen).play()
+    except: print("Voiceline wasn't found.")
 
 
 # Function that will stop all sounds from playing
 def StopSounds():
-    if pygame.mixer.get_busy(): # If sounds are playing
-        pygame.mixer.stop() # Stop za sounds >: (
+    if pygame.mixer.get_busy(): pygame.mixer.stop() # Stop za sounds >: (
 
 
 # General Greeting (Good Morning/Afternoon and Greet)
 def GeneralGreeting():
-    MTeamsChangeInputDevice("StereoMix") # Switches to Stereo Mix on Microsoft Teams
+    MicrosoftTeamsChangeDevice("Speaking to Client") # Switches to Stereo Mix on Microsoft Teams
     CurrentDateandTime = datetime.datetime.now() # Gets time to determine whether Good Afternoon or Good Morning
     playVoiceLine("GoodMorning" if CurrentDateandTime.strftime("%p") == "AM" else "GoodAfternoon")
     playVoiceLine("Greeting")
-    MTeamsChangeInputDevice("Headset")
+    MicrosoftTeamsChangeDevice("Listening to Client")

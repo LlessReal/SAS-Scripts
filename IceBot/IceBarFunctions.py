@@ -34,14 +34,11 @@ def PressIceButton(ImagePath,WaitMessage="",FailMessage="",TypeTransfer=False,Tr
 
 # Function that transfers the users
 def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingProgram=False):
-    if StartingProgram:
-        print("Program hasn't started yet")
-        return
+    if StartingProgram: print("Program hasn't started yet"); return
     if SayVoiceLine: # If Say Voice Line Check Box is Checked
         SoundFunctions.playVoiceLine("TransferingNow") # Plays line
-        if WaitBeforeGo: # If Wait for reaction is checked
-            print("Waiting for reaction")
-            sleep(5) # Wait for reacton
+        # If Wait for reaction is checked
+        if WaitBeforeGo: print("Waiting for reaction"); sleep(5) # Wait for reacton
     print(f"{TransferNumber} is attempting to be sent")
     # Save OG Position
     InitialPosition = pya.position()

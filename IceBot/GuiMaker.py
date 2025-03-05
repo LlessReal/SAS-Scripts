@@ -1,24 +1,21 @@
 from config import VoicelineFolderName, ImportantTermDictionary, CurrentPath
-from SoundFunctions import playSound, playVoiceLine, StopSounds
+from SoundFunctions import playSound, StopSounds
 from OtherFunctions import OpenWindow
-from Initiation import MTeamsChangeInputDevice
 from Initiation import StartFunction, RepeatPlease
 from IceBarFunctions import AutoTransferSubmitVersion
 from tkinter import *
-import os, threading
+import os, threading, SchizoRadio, pygame
+from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
 
 root = Tk() # Creates main window
 root.title("IceBot Gui")
 root.wait_visibility() # Wait until the label becomes visible
-root.geometry("600x360") # Sets the window size
+root.geometry("600x360") 
 root.config(background="Gray")
 StopSetting = IntVar()
 TestingBotToggle = IntVar()
-def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResponse=""):
-    if Reset == True:
-        ResetGui()
-        OpenWindow("IceBot Gui")
-        pass
+def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,BotsResponse=""):
+    if ResettingGui == True: ResetGui(); OpenWindow("IceBot Gui")
 
     # Phone Number Label and Entry
     PhoneNumLabel = Label(root, text = 'Phone Number: ', font=('calibre',10, 'bold')) # Makes label with text Username and certain font
@@ -43,45 +40,45 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
             TransferButton.grid(row=1 + NextInLine,column=2)
             NextInLine += 1  
 
+    SoundChannels = []
     # Custom Sound Buttons
     CustomSounds = os.listdir(fr"{CurrentPath}\Custom Sounds")
     CustomSoundLabel = Label(root, text = "Custom Sounds", font=('calibre',10, 'bold'))
     CustomSoundLabel.grid(row=1 + NextInLine,column=1)
     for CustomSound in CustomSounds:
+        SoundChannels.append(pygame.mixer.Channel(len(SoundChannels)))
         if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0: NextInLine += 1 
-        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=False)) # Seperates the numbers
+        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=False,ChannelPicked=SoundChannels[len(SoundChannels) - 1])) # Seperates the numbers
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
     # Character Voice Lines
     # Building the character voice lines list
     CharacterVoiceLines = [CharacterVoiceLine for CharacterVoiceLine in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}") if "mp3" in CharacterVoiceLine]
+    
+    
     # Makes a new list with only files that have "mp3" in it
     CharacterVoiceLinesLabel = Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
     CharacterVoiceLinesLabel.grid(row=3 + NextInLine,column=1)
     for CharacterVoiceLine in CharacterVoiceLines:
+        SoundChannels.append(pygame.mixer.Channel(len(SoundChannels)))
         if (CharacterVoiceLines.index(CharacterVoiceLine) % 3) == 0 and CharacterVoiceLines.index(CharacterVoiceLine) != 0:
             NextInLine += 1 
-        CharacterVoiceLineButton = Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=True)) # Seperates the numbers
+        CharacterVoiceLineButton = Button(root, text = CharacterVoiceLine, bg="pink", fg="white", command = lambda t=CharacterVoiceLine: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=True,ChannelPicked=SoundChannels[len(SoundChannels) - 1])) # Seperates the numbers
         CharacterVoiceLineButton.grid(row=4 + NextInLine,column=(CharacterVoiceLines.index(CharacterVoiceLine) % 3))
     
     # Transfer Toggle
-    TransferLineToggle = IntVar()
-    TransferLineToggle.set(1)
+    global TransferLineToggle; TransferLineToggle = IntVar(); TransferLineToggle.set(1)
     TransferVoiceLineOn = Checkbutton(root, text="Play transfer line", variable=TransferLineToggle)
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease(SayMessage=RepeatToggle.get()))
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease(SayMessage=RepeatVoiceLineToggle.get()))
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
     # Wait Toggle
-    WaitToggle = IntVar()
-    WaitToggle.set(1)
+    global WaitToggle; WaitToggle = IntVar(); WaitToggle.set(1)
     WaitToggleOn = Checkbutton(root,text="Wait for Reaction",variable=WaitToggle)
     WaitToggleOn.grid(row=6 + NextInLine,column=0)
-
-    if "INITIATE TRANSFER" in BotsResponse:
-        AutoTransferSubmitVersion(BotsResponse[BotsResponse.find("- ") + 2:BotsResponse.find("]")],TransferLineToggle.get(),WaitToggle.get())
         
     # Start Main Function
     #if StartingProgram:
@@ -99,14 +96,12 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
     StopAllSoundsButton.grid(row=6 + NextInLine,column=2) # One bit over all the others
     
     # Repeat Toggle
-    RepeatToggle = IntVar()
-    RepeatToggle.set(0)
-    RepeatToggleBox = Checkbutton(root, text="Repeat Toggle",variable=RepeatToggle) 
+    RepeatVoiceLineToggle = IntVar(); RepeatVoiceLineToggle.set(0)
+    RepeatToggleBox = Checkbutton(root, text="Repeat Toggle",variable=RepeatVoiceLineToggle) 
     RepeatToggleBox.grid(row=7 + NextInLine,column=0)
 
     # Speed Scale
-    SpeedScaleVariable = DoubleVar()
-    SpeedScaleVariable.set(1.0)
+    SpeedScaleVariable = DoubleVar(); SpeedScaleVariable.set(1.0)
     SpeedScale = Scale( root, variable = SpeedScaleVariable,  
            from_ = 0.5, to = 2, resolution=0.01,
            orient = HORIZONTAL) 
@@ -116,17 +111,16 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
     NormalizeSpeedButton.grid(row=8 + NextInLine,column=1)
 
     # Brainrot Mode
-    BrainrotModeToggle = IntVar()
-    BrainrotModeToggle.set(0)
+    BrainrotModeToggle = IntVar(); BrainrotModeToggle.set(0)
     BrainrotModeToggleBox = Checkbutton(root, text="Brainrot Mode",variable=BrainrotModeToggle) 
     BrainrotModeToggleBox.grid(row=8 + NextInLine,column=2)
 
     # Regular Mic Toggle Button
-    HeadsetToggle = Button( root, text="Activate Headset", bg="purple",fg="white",command= lambda: MTeamsChangeInputDevice("Headset")) 
-    HeadsetToggle.grid(row=9 + NextInLine,column=0)
+    HeadsetandMicToggle = Button( root, text="Activate Headset and Mic", bg="purple",fg="white",command= lambda: MicrosoftTeamsChangeDevice("Listening To Client")) 
+    HeadsetandMicToggle.grid(row=9 + NextInLine,column=0)
     # Stereo Mix Toggle Button
-    SpeakersToggle = Button( root, text="Activate Speakers", bg="purple",fg="white",command= lambda:  MTeamsChangeInputDevice("Speakers")) 
-    SpeakersToggle.grid(row=9 + NextInLine,column=1)
+    StereoandSpeakerToggle = Button( root, text="Activate Speakers and Stereo", bg="purple",fg="white",command= lambda:  MicrosoftTeamsChangeDevice("Speaking to Client")) 
+    StereoandSpeakerToggle.grid(row=9 + NextInLine,column=1)
 
     # Testing Bot Mode
     
@@ -140,23 +134,24 @@ def makeTransferGui(TheCallersWords="",Reset=True,StartingProgram=False,BotsResp
     RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 
     RefreshGuiButton.grid(row=10 + NextInLine,column=1)
 
+    # Radio Toggle
+    ToggleRadioButton = Button(root, text="Toggle Radio", bg="black",fg="white",command= lambda: SchizoRadio.RadioControl("On" if SchizoRadio.channel21.get_volume() == 0 else "Off")) 
+    ToggleRadioButton.grid(row=11 + NextInLine,column=0)
+
+    # Change Song
+    ChangeSongButton = Button(root, text="Change Song", bg="white",fg="black",command= lambda: SchizoRadio.RadioControl("Change Song")) 
+    ChangeSongButton.grid(row=11 + NextInLine,column=1)
+    for Channel in SoundChannels: print(Channel)
     root.update()
-    if StartingProgram and StopSetting.get() != 1:
-        root.mainloop() # End
+    if StartingProgram and StopSetting.get() != 1: root.mainloop() 
     return PhoneNum.get()
 
-# Function to clear out all widgets inside a frame
-def ResetGui():
-    for widget in root.winfo_children(): # Iterate through every widget inside the frame
-        widget.destroy() # deleting widget
+# Function to clear/delete out all widgets inside a frame
+def ResetGui(): 
+    for widget in root.winfo_children(): widget.destroy() 
 
 # Function that returns to the start
 def BackToStageOne(AfterTransfer=False):
     if StopSetting.get() == 0:
-        if AfterTransfer:
-            InitiationThread.start()
-        return
-    else:
-        print("Time ta head out")
-        makeTransferGui(StartingProgram=True)
-        return "ResetGuiNow"
+        if AfterTransfer: InitiationThread.start(); return
+    else: print("Time ta head out"); makeTransferGui(StartingProgram=True); return "ResetGuiNow"
