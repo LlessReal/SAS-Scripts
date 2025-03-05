@@ -32,3 +32,33 @@ RegularMicToggle.grid(row=9 + NextInLine,column=0)
 # Stereo Mix Toggle Button
 StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",command= ChangeToStereoMix) 
 StereoToggle.grid(row=9 + NextInLine,column=1)
+
+
+
+def ChangeInputandOutput(StereoMixArea,SpeakerArea):
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown); time.sleep(0.5)
+    except: print("Couldn't find Microsoft Dropdown :("); return
+    for i in range(3): pya.press("tab")
+    time.sleep(1)
+    for i in range(StereoMixArea - 1): pya.press("tab") # Tab onto the correct Incoming Audio Choice
+    time.sleep(0.5); pya.press('enter') # Wait then press enter
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown); time.sleep(0.5)
+    except: print("Couldn't find Microsoft Dropdown :("); return
+
+    # Now change to speaker
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown); time.sleep(0.5)
+    except: print("Couldn't find Microsoft Dropdown :("); return
+    for i in range(7): pya.press("tab")
+    time.sleep(1)
+    for i in range(SpeakerArea - 1): pya.press("tab") # Tab onto the correct Incoming Audio Choice
+    time.sleep(0.5); pya.press('enter') # Wait then press enter
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown); time.sleep(0.5)
+    except: print("Couldn't find Microsoft Dropdown :("); return

@@ -11,7 +11,12 @@ HeadPhoneArea = 1
 # Input Areas (Gotta press Tab 3 TImes to get to)
 StereoMixArea = 1 # 3 times
 MicArea = 2
+SpeakerOptions = 4 # Put the amount u see
+MicOptions = 2
 
+api_key = ""
+
+# Go to Microsoft settings -> Devices, and press the Icon that's next to Audio Settings (AFTER MOVING THE SETTING TO WHERE YOU WANT IT TO BE !!!!!!!)
 # Important phone numbers and names
 ImportantTermDictionary = {
     "human resources": (7065078920,""),

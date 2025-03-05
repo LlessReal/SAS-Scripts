@@ -48,7 +48,7 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     for CustomSound in CustomSounds:
         SoundChannels.append(pygame.mixer.Channel(len(SoundChannels)))
         if (CustomSounds.index(CustomSound) % 3) == 0 and CustomSounds.index(CustomSound) != 0: NextInLine += 1 
-        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda t=CustomSound: playSound(t,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=False,ChannelPicked=SoundChannels[len(SoundChannels) - 1])) # Seperates the numbers
+        CustomButton = Button(root, text = CustomSound[:CustomSound.find(".mp3")], bg="purple", fg="white", command = lambda IndividualSound=CustomSound, SoundChannel=SoundChannels[len(SoundChannels) - 1]: playSound(IndividualSound,SpeedScaleVariable.get(),BrainrotModeToggle.get(),CharacterLine=False,ChannelPicked=SoundChannel)) # Seperates the numbers
         CustomButton.grid(row=2 + NextInLine,column=(CustomSounds.index(CustomSound) % 3))
     
     # Character Voice Lines
@@ -141,7 +141,6 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     # Change Song
     ChangeSongButton = Button(root, text="Change Song", bg="white",fg="black",command= lambda: SchizoRadio.RadioControl("Change Song")) 
     ChangeSongButton.grid(row=11 + NextInLine,column=1)
-    for Channel in SoundChannels: print(Channel)
     root.update()
     if StartingProgram and StopSetting.get() != 1: root.mainloop() 
     return PhoneNum.get()

@@ -5,7 +5,6 @@ from pydub import AudioSegment # Play sound from soundboard
 from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
 AudioSegment.converter = fr'{CurrentPath}\ffmpeg' # Change audio speed thing yeaaaaaa
 
-
 def ChangeAudio(input_file_path, output_file_path, speed):
     """
     Slows down an audio file using FFmpeg without changing pitch.
@@ -94,7 +93,6 @@ def playVoiceLine(VoicelineType):
 # Function that will stop all sounds from playing
 def StopSounds():
     if pygame.mixer.get_busy(): pygame.mixer.stop() # Stop za sounds >: (
-
 
 # General Greeting (Good Morning/Afternoon and Greet)
 def GeneralGreeting():

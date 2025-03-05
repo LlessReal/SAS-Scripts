@@ -1,6 +1,6 @@
 import os, pygame, config, random, threading, time
-pygame.mixer.init() # For debugging
-pygame.mixer.set_num_channels(22)
+#pygame.mixer.init() # For debugging
+#pygame.mixer.set_num_channels(22)
 
 num_channels = pygame.mixer.get_num_channels()
 print(f"Number of available channels: {num_channels}")

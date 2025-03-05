@@ -1,6 +1,6 @@
 import pyautogui as pya
 from time import sleep
-from config import CurrentPath
+from config import CurrentPath, api_key
 import GuiMaker, SoundFunctions, pyttsx3, IceBarFunctions, SchizoRadio
 engine = pyttsx3.init() # Initialize the engine
 # Adjust speaking rate and volume
@@ -12,7 +12,7 @@ from huggingface_hub import InferenceClient
 
 client = InferenceClient(
 	provider="novita",
-	api_key=""
+	api_key=api_key
 )
 
 def StartFunction(TestingBot,StartingProgram):
@@ -94,14 +94,11 @@ def GenerateBotResponse(DetailsExplained):
             max_tokens=500,
         )
         BotsResponse = completion.choices[0].message.content
-        # Remove Initiate Transfer Message
-        BotsResponse = BotsResponse.replace(BotsResponse[BotsResponse.find("[INITIATE"):],"")
     except Exception as e: print(f"Error running bot {e}"); return
     SchizoRadio.RadioControl("Off")
     print(f"Bot's Response: {BotsResponse}")
-    # Says the bot's response and stop the engine after
-    
-    engine.say(BotsResponse); engine.runAndWait(); engine.stop() 
+    # Says the bot's response (Without the initiate part lol) and stop the engine after
+    engine.say(BotsResponse.replace(BotsResponse[BotsResponse.find("[INITIATE"):],"")); engine.runAndWait(); engine.stop() 
     # FINAL PHASE: Transfering
     if "INITIATE TRANSFER" in BotsResponse: 
         IceBarFunctions.AutoTransferSubmitVersion(TransferNumber=BotsResponse[BotsResponse.find("- ") + 2:BotsResponse.find("]")],SayVoiceLine=GuiMaker.TransferLineToggle.get(),WaitBeforeGo=GuiMaker.WaitToggle.get())
@@ -111,3 +108,5 @@ def RepeatPlease(SayRepeatVoiceLine=0):
     # Asks caller to repeat what they said if this is on
     if SayRepeatVoiceLine == 1: SoundFunctions.playVoiceLine("Repeat")
     CallersMessage = IceBarFunctions.getCallerMessage() 
+    DetailsExplained = f"A caller has said the following message: {CallersMessage}\nRespond to the caller's message"
+    GenerateBotResponse(DetailsExplained)
