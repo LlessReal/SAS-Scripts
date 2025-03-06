@@ -28,7 +28,7 @@ def StartFunction(TestingBot,StartingProgram):
             # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
             while True: 
                 try: # Uses mute button to determine if call started
-                    pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MuteAvailable.png') # Checks to see if mute option is available 
+                    pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\PersonIcon.png') # Checks to see if mute option is available 
                     print("Call has started !!")
                     SoundFunctions.GeneralGreeting(); break # Greets and break out
                 except:
