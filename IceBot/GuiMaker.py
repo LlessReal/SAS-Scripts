@@ -142,7 +142,7 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
 
     # Auto-Change Song
     global AutoChangeSongToggle; AutoChangeSongToggle = IntVar(); AutoChangeSongToggle.set(0)
-    AutoChangeSongButton = Checkbutton(root, text="Auto-Change Song", bg="gray",fg="white",variable = AutoChangeSongToggle) 
+    AutoChangeSongButton = Checkbutton(root, text="Auto-Change Song",variable=AutoChangeSongToggle) 
     AutoChangeSongButton.grid(row=11 + NextInLine,column=2)
 
     # Lastly...
