@@ -4,18 +4,18 @@ from OtherFunctions import OpenWindow
 from Initiation import StartFunction, RepeatPlease
 from IceBarFunctions import AutoTransferSubmitVersion
 from tkinter import *
-import os, threading, SchizoRadio, pygame
+import os, threading, SchizoRadio, pygame, sys
 from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
 
-root = Tk() # Creates main window
-root.title("IceBot Gui")
-root.wait_visibility() # Wait until the label becomes visible
-root.geometry("600x360") 
+root = Tk(); root.title("IceBot Gui"); root.wait_visibility() 
+root.geometry("600x360")
 root.config(background="Gray")
-StopSetting = IntVar()
-TestingBotToggle = IntVar()
+StopSetting = IntVar(); TestingBotToggle = IntVar()
+
+def RestartProgram(): root.destroy(); raise TypeError("Restarting Program") 
 def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,BotsResponse=""):
     if ResettingGui == True: ResetGui(); OpenWindow("IceBot Gui")
+    
 
     # Phone Number Label and Entry
     PhoneNumLabel = Label(root, text = 'Phone Number: ', font=('calibre',10, 'bold')) # Makes label with text Username and certain font
@@ -55,7 +55,6 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     # Building the character voice lines list
     CharacterVoiceLines = [CharacterVoiceLine for CharacterVoiceLine in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}") if "mp3" in CharacterVoiceLine]
     
-    
     # Makes a new list with only files that have "mp3" in it
     CharacterVoiceLinesLabel = Label(root, text = "Custom Character Voice Lines", font=('calibre',10, 'bold'))
     CharacterVoiceLinesLabel.grid(row=3 + NextInLine,column=1)
@@ -83,9 +82,9 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     # Start Main Function
     #if StartingProgram:
     if not StartingProgram:
-        StartProgramButton = Button(root, text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),BackToStageOne(),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")]) 
+        StartProgramButton = Button(root, text="Stop Program",bg="orange", command=RestartProgram)
     else:
-        StartProgramButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = lambda: [StopSetting.set(0),InitiationThread.start(),StartProgramButton.config(text="Stop Program",bg="orange", command = lambda: [StopSetting.set(1),StartProgramButton.config(text="Stopping Program...",bg="red",state="disabled")])]) 
+        StartProgramButton = Button(root, text = "Commence Za Program", bg="yellow", fg="white", command = lambda: [StopSetting.set(0),InitiationThread.start(),StartProgramButton.config(text="Stop Program",bg="orange", command = lambda: exit("Restarting Program"))]) 
     StartProgramButton.grid(row=6 + NextInLine,column=1) # One bit over all the other
     #else:
     #    StopProgramButton = Button(root, text = "Stop Program", bg="orange", fg="white", command = lambda: [StopSetting.set(1),StopProgramButton.config(text="Stopping Program...",bg="red",state="disabled")])

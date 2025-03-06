@@ -10,10 +10,7 @@ voices = engine.getProperty('voices'); engine.setProperty('voice', voices[0].id)
 
 from huggingface_hub import InferenceClient
 
-client = InferenceClient(
-	provider="novita",
-	api_key=api_key
-)
+client = InferenceClient(provider="novita", api_key=api_key)
 
 def StartFunction(TestingBot,StartingProgram):
     GuiMaker.makeTransferGui()
@@ -21,8 +18,6 @@ def StartFunction(TestingBot,StartingProgram):
         ###### PHASE 1 - Greeting
         if TestingBot: # If testing, will use regular mic, then go straight to general greeting
             print("Testing Mode On. Program starts in 5 seconds"); sleep(5)
-            ResetState = GuiMaker.BackToStageOne()
-            if ResetState == "ResetGuiNow": return
             SoundFunctions.GeneralGreeting() # Good Morning/Afternoon and then the greeting
         else: # If not testing
             # Wait for person to call
@@ -40,8 +35,6 @@ def StartFunction(TestingBot,StartingProgram):
                     if CallInactive == False: print("Waiting for Answer Button to be active....") # This is so it won't be spammed.
                     CallInactive = True # needed to not make above message spam
                     sleep(0.1)
-                    ResetState = GuiMaker.BackToStageOne()
-                    if ResetState == "ResetGuiNow": return
             # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
             while True: 
                 try:
@@ -61,8 +54,6 @@ def StartFunction(TestingBot,StartingProgram):
                     if CallInactive == False: print("Waiting for call to load...") # This is so it won't be spammed.
                     CallInactive = True # needed to not make above message spam
                     sleep(0.1)
-                    ResetState = GuiMaker.BackToStageOne()
-                    if ResetState == "ResetGuiNow": return
         
         ##### PHASE 2 - Grab Info From Caller
         CallersMessage = IceBarFunctions.getCallerMessage() 
