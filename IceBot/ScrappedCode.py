@@ -34,6 +34,15 @@ StereoToggle = Button( root, text="Turn on Stereo Mix", bg="purple",fg="white",c
 StereoToggle.grid(row=9 + NextInLine,column=1)
 
 
+# Open Call Window
+    try: OtherFunctions.OpenWindow("(External)"); time.sleep(0.5) # Open the call window
+    except: return # Usually if this occurs, you're in testing mode
+    # Click the dropdown
+    try:
+        MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
+        pya.click(MicrosoftDropDown); time.sleep(0.5)
+    except: print("Couldn't find Microsoft Dropdown :("); return
+
 
 def ChangeInputandOutput(StereoMixArea,SpeakerArea):
     try:
@@ -62,3 +71,24 @@ def ChangeInputandOutput(StereoMixArea,SpeakerArea):
         MicrosoftDropDown = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\MicrosoftDropDown.png')
         pya.click(MicrosoftDropDown); time.sleep(0.5)
     except: print("Couldn't find Microsoft Dropdown :("); return
+
+
+
+def ChangeInputandOutput(Input,Output):
+    InitialLocation = pya.position()
+    OtherFunctions.OpenWindow("Settings")
+    for i in range(2): pya.press("tab") 
+    # Change Speaker
+    pya.press("enter")
+    for i in range(SpeakerOptions): pya.press("up") # Attempt to go to the stop
+    for i in range(Output - 1): pya.press("down")
+    pya.press("enter"); pya.press("tab")
+    # Change Mic
+    pya.press("enter")
+    for i in range(MicOptions): pya.press("up") # Attempt to go to the stop
+    for i in range(Input - 1): pya.press("down")
+    pya.press("enter")
+    # Return
+    for i in range(2): pya.hotkey("shift","tab")
+    pya.click(InitialLocation)
+# No questions asked.

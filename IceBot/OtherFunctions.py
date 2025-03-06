@@ -4,9 +4,8 @@ import pygetwindow as gw
 def OpenWindow(WindowName):
     Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
     if Window.isMinimized: Window.restore() # If the window is minimized
-    Window.activate()  # Activates the window
+    try: Window.activate()  # Activates the window
+    except Exception as e: print(e)
     
 # Closes Window
-def CloseWindow(WindowName):
-    Window = gw.getWindowsWithTitle(WindowName)[0] # Goes back to Excel Sheet
-    Window.close()  # Activates the window
+def CloseWindow(WindowName): Window = gw.getWindowsWithTitle(WindowName)[0]; Window.close()  

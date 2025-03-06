@@ -1,6 +1,7 @@
 import pygame
 pygame.mixer.init(); pygame.mixer.set_num_channels(22)
-import os, GuiMaker
+import os
+import GuiMaker
 import sounddevice as sd
 from config import ViewAllDeviceNames
 
@@ -13,6 +14,6 @@ if __name__ == '__main__':
     while True:
         try: main() 
         except Exception as e: 
-            print(e)
+            print(e) 
             if "Restarting Program" in str(e): continue
-            else: print("The program broke L", e); break 
+            else: print("The program broke L", e); os.system("taskkill /f /im python*") 

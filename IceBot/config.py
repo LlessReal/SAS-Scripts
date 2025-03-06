@@ -3,18 +3,16 @@ import os, whisper
 ViewAllDeviceNames = False # Btw , if this is on the program won't go
 VoicelineFolderName = "Mickey" # Add GoodAfternoon.wav, GoodMorning.wav, Greeting.wav (With numbers after), PleaseWait.wav, and Repeat.wav inside this folder
 ModelName = "sblight2"  # Replace with your desired Ollama model
-
+SpeakerName = "Speakers (Synaptics HD Audio)"
+api_key = ""
 # Incoming Audio Areas (Gotta press Tab 7 TImes to get to)
 SpeakerArea = 2 
 HeadPhoneArea = 1 
-
 # Input Areas (Gotta press Tab 3 TImes to get to)
 StereoMixArea = 1 # 3 times
 MicArea = 2
 SpeakerOptions = 4 # Put the amount u see
 MicOptions = 2
-
-api_key = ""
 
 # Go to Microsoft settings -> Devices, and press the Icon that's next to Audio Settings (AFTER MOVING THE SETTING TO WHERE YOU WANT IT TO BE !!!!!!!)
 # Important phone numbers and names
@@ -30,7 +28,6 @@ ImportantTermDictionary = {
     "housing": (7065078710,""),
 }
 
-# Model name
 model = whisper.load_model("base") # Download the model
 
 # Post Config Stuff (Just ignore)

@@ -3,6 +3,7 @@ import os, random, wave, pyaudio, pygame, datetime
 from config import VoicelineFolderName, CurrentPath 
 from pydub import AudioSegment # Play sound from soundboard
 from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
+import MicrosoftTeamsControl
 AudioSegment.converter = fr'{CurrentPath}\ffmpeg' # Change audio speed thing yeaaaaaa
 
 def ChangeAudio(input_file_path, output_file_path, speed):
@@ -65,8 +66,8 @@ def PlayWaveFile(WavFile):
     while data:
         stream.write(data)
         data = wf.readframes(chunk)
-    stream.stop_stream() # Stop receiving data
-    stream.close() # Close Stream
+    # Stop receiving data and close stream
+    stream.stop_stream(); stream.close() 
     p.terminate()
 
 
@@ -76,8 +77,7 @@ def playVoiceLine(VoicelineType):
         UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
         pya.click(UnMuteAvailable) # Unmute myself to hear caller  
     except: pass
-    try: MicrosoftTeamsChangeDevice("Speaking to Client")
-    except: pass
+    if not MicrosoftTeamsControl.SpeakingToClient: MicrosoftTeamsChangeDevice("Speaking to Client") 
 
     AllVoicelines = [] # List Initialization
     for Voiceline in os.listdir(fr"{CurrentPath}\{VoicelineFolderName}"): # Gets all files in the Voiceliens folder

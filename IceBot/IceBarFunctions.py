@@ -1,5 +1,4 @@
 import pyautogui as pya
-import GuiMaker
 from time import sleep
 from OtherFunctions import CloseWindow
 # Selenium
@@ -14,21 +13,16 @@ def PressIceButton(ImagePath,WaitMessage="",FailMessage="",TypeTransfer=False,Tr
     while True:
         try:
             ButtonToBePressed = pya.locateOnScreen(ImagePath) # Finds transfer button, if it's not on screen, goes to except
-            if TypeTransfer == False:
-                pya.click(ButtonToBePressed) # Click the button
+            if TypeTransfer == False: pya.click(ButtonToBePressed) # Click the button
             else: pya.write(f"{TransferNumber} \n") # Types number and then press enter
             sleep(1)
             return
         except:
             if Wait == True:
-                if AlreadyTried == False:
-                    print(WaitMessage)
-                    AlreadyTried = True
+                if AlreadyTried == False: print(WaitMessage); AlreadyTried = True
                 sleep(0.1)
                 Timeout += 1
-            if Timeout == 100 or Wait == False:
-                print(FailMessage) 
-                return "Fail"
+            if Timeout == 100 or Wait == False: print(FailMessage); return "Fail"
             continue 
 
 
@@ -51,12 +45,9 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
             # If we should type transfer next
             MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\InitiateTransferButton.png",WaitMessage="Waiting for Transfer Initiation to load..",FailMessage="Failed operation. PC too laggy",TypeTransfer=True,TransferNumber=TransferNumber) 
     
-    if MoveOnStatus != "Fail": 
-        CloseWindow("(External)") # Close the calling window   
-        print("Transfer Successful!")
+    if MoveOnStatus != "Fail": CloseWindow("(External)"); print("Transfer Successful!")
     print("Returning to initial stage")
     pya.moveTo(InitialPosition) # # Go to OG position
-    ResetState = GuiMaker.BackToStageOne(True)
 
 # Gets caller's message
 def getCallerMessage():   
@@ -101,7 +92,7 @@ def getCallerMessage():
 def PleaseRepeat(AskedtoSpeakAlready):
     if AskedtoSpeakAlready: # If we tried this already
         SoundFunctions.playVoiceLine("Goodbye") # Says good bye
-        CloseWindow("(External)") # and closes the call window
+        CloseWindow("(External)") 
         return "Left the Call"
     else: SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
 # Make AskedtoSpeakAlready = True and add a continue after this function

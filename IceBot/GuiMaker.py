@@ -1,7 +1,7 @@
 from config import VoicelineFolderName, ImportantTermDictionary, CurrentPath
 from SoundFunctions import playSound, StopSounds
 from OtherFunctions import OpenWindow
-from Initiation import StartFunction, RepeatPlease
+from Initiation import StartFunction, GatherCallersInfo
 from IceBarFunctions import AutoTransferSubmitVersion
 from tkinter import *
 import os, threading, SchizoRadio, pygame, sys
@@ -16,7 +16,6 @@ def RestartProgram(): root.destroy(); raise TypeError("Restarting Program")
 def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,BotsResponse=""):
     if ResettingGui == True: ResetGui(); OpenWindow("IceBot Gui")
     
-
     # Phone Number Label and Entry
     PhoneNumLabel = Label(root, text = 'Phone Number: ', font=('calibre',10, 'bold')) # Makes label with text Username and certain font
     PhoneNumLabel.grid(row=0,column=0)
@@ -71,7 +70,7 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     TransferVoiceLineOn.grid(row=5 + NextInLine,column=0)
     
     # Repeat/Ask For Clarification
-    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: RepeatPlease(SayMessage=RepeatVoiceLineToggle.get()))
+    RepeatButton = Button(root, text = "Repeat/Ask For Clarification", bg="red", fg="white", state="disabled" if StartingProgram == True else "normal", command = lambda: GatherCallersInfo(SayMessage=RepeatVoiceLineToggle.get()))
     RepeatButton.grid(row=5 + NextInLine,column=1) # One bit over all the others
 
     # Wait Toggle
@@ -140,9 +139,15 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     # Change Song
     ChangeSongButton = Button(root, text="Change Song", bg="white",fg="black",command= lambda: SchizoRadio.RadioControl("Change Song")) 
     ChangeSongButton.grid(row=11 + NextInLine,column=1)
+
+    # Auto-Change Song
+    global AutoChangeSongToggle; AutoChangeSongToggle = IntVar(); AutoChangeSongToggle.set(0)
+    AutoChangeSongButton = Checkbutton(root, text="Auto-Change Song", bg="gray",fg="white",variable = AutoChangeSongToggle) 
+    AutoChangeSongButton.grid(row=11 + NextInLine,column=2)
+
+    # Lastly...
     root.update()
     if StartingProgram and StopSetting.get() != 1: root.mainloop() 
-    return PhoneNum.get()
 
 # Function to clear/delete out all widgets inside a frame
 def ResetGui(): 
