@@ -114,7 +114,7 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     BrainrotModeToggleBox.grid(row=8 + NextInLine,column=2)
 
     # Regular Mic Toggle Button
-    HeadsetandMicToggle = Button( root, text="Activate Headset and Mic", bg="purple",fg="white",command= lambda: MicrosoftTeamsChangeDevice("Listening To Client")) 
+    HeadsetandMicToggle = Button( root, text="Activate Headset and Mic", bg="purple",fg="white",command= lambda: MicrosoftTeamsChangeDevice("Listening to Client")) 
     HeadsetandMicToggle.grid(row=9 + NextInLine,column=0)
     # Stereo Mix Toggle Button
     StereoandSpeakerToggle = Button( root, text="Activate Speakers and Stereo", bg="purple",fg="white",command= lambda:  MicrosoftTeamsChangeDevice("Speaking to Client")) 
