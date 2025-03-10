@@ -5,12 +5,13 @@ VoicelineFolderName = "Mickey" # Add GoodAfternoon.wav, GoodMorning.wav, Greetin
 ModelName = "sblight2"  # Replace with your desired Ollama model
 SpeakerName = "Speakers (Synaptics HD Audio)"
 api_key = ""
+openrouterapikey = "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"
 # Incoming Audio Areas (Gotta press Tab 7 TImes to get to)
 SpeakerArea = 2 
 HeadPhoneArea = 1 
 # Input Areas (Gotta press Tab 3 TImes to get to)
-StereoMixArea = 1 # 3 times
-MicArea = 2
+StereoMixArea = 2 # 3 times
+MicArea = 1
 SpeakerOptions = 4 # Put the amount u see
 MicOptions = 2
 

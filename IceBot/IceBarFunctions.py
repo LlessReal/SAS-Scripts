@@ -4,27 +4,22 @@ from OtherFunctions import CloseWindow
 # Selenium
 import speech_recognition as sr
 from config import model, CurrentPath
-import SoundFunctions
+import SoundFunctions, SchizoRadio
 
 # Function to press a button on IceBar (other than the drop down)
-def PressIceButton(ImagePath,WaitMessage="",FailMessage="",TypeTransfer=False,TransferNumber=0,Wait=False):
-    AlreadyTried = False 
-    Timeout = 0   
-    while True:
-        try:
-            ButtonToBePressed = pya.locateOnScreen(ImagePath) # Finds transfer button, if it's not on screen, goes to except
-            if TypeTransfer == False: pya.click(ButtonToBePressed) # Click the button
-            else: pya.write(f"{TransferNumber} \n") # Types number and then press enter
-            sleep(1)
-            return
-        except:
-            if Wait == True:
-                if AlreadyTried == False: print(WaitMessage); AlreadyTried = True
-                sleep(0.1)
-                Timeout += 1
-            if Timeout == 100 or Wait == False: print(FailMessage); return "Fail"
-            continue 
+from pywinauto import Application
+app = Application(backend='uia').connect(title_re=".*Settings.*")
 
+def TransferToNumber(TransferNumber=0):
+    try:
+        app = Application(backend='uia').connect(title_re=".*iceBar.*"); print("Successfully connected to iceBar")
+        main_window = app.window(title_re=".*iceBar.*")
+    except: print("Icebar is off"); return
+    DropDown = main_window.child_window(title="More Contact Buttons", auto_id="ContactOverflowPopupToggleButton", control_type="Button")
+    DropDown.click_input()
+    TransferButton = main_window.child_window(title="Transfer", auto_id="TransferCallButton_1", control_type="Button")
+    TransferButton.click_input()
+    sleep(5); pya.write(f"{TransferNumber} \n")
 
 # Function that transfers the users
 def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingProgram=False):
@@ -37,17 +32,9 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
     # Save OG Position
     InitialPosition = pya.position()
     # Tries to press the dropdown
-    MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\Icebardropdownarrow.png",FailMessage="Ice bar is closed/missing") 
-    if MoveOnStatus != "Fail":
-        # Pressing Transfer Button Next
-        MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\TransferButton.png",FailMessage="You're not in a call.")   
-        if MoveOnStatus != "Fail":
-            # If we should type transfer next
-            MoveOnStatus = PressIceButton(fr"{CurrentPath}\..\IceBarImages\InitiateTransferButton.png",WaitMessage="Waiting for Transfer Initiation to load..",FailMessage="Failed operation. PC too laggy",TypeTransfer=True,TransferNumber=TransferNumber) 
-    
-    if MoveOnStatus != "Fail": CloseWindow("(External)"); print("Transfer Successful!")
-    print("Returning to initial stage")
-    pya.moveTo(InitialPosition) # # Go to OG position
+    TransferToNumber(TransferNumber) 
+    CloseWindow("(External)")
+    print(" Transfer Successful! Returning to initial location"); pya.moveTo(InitialPosition) # # Go to OG position
 
 # Gets caller's message
 def getCallerMessage():   
@@ -65,7 +52,7 @@ def getCallerMessage():
                 if LeaveCallNotice == "Left the Call": return
                 else: continue
             
-            print("Stopped recording")
+            print("Stopped recording"); SchizoRadio.RadioControl("On")
             try: # Try to save their message
                 with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file: file.write(audio.get_wav_data())
                 print("Audio saved as CallersMessage.wav")
@@ -91,8 +78,6 @@ def getCallerMessage():
 # Function that asks caller to repeat what they said
 def PleaseRepeat(AskedtoSpeakAlready):
     if AskedtoSpeakAlready: # If we tried this already
-        SoundFunctions.playVoiceLine("Goodbye") # Says good bye
-        CloseWindow("(External)") 
-        return "Left the Call"
+        SoundFunctions.playVoiceLine("Goodbye"); CloseWindow("(External)"); return "Left the Call"
     else: SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
 # Make AskedtoSpeakAlready = True and add a continue after this function

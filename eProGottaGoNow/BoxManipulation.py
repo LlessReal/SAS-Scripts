@@ -13,14 +13,10 @@ if AllTextFromeProDoc == "":
 
 # Function to fill color
 def FillColor(Down,Right):
-    pya.press('alt')
-    keyboard.write("hh") # Alt + H + H
-    time.sleep(0.5) # Wait a bit for box to load
+    pya.press('alt'); keyboard.write("hh"); time.sleep(0.5) 
     pya.press('down') # Initialize selection
-    for Downs in range(Down):
-        pya.press('down') # Goes down depending on how much called
-    for Rights in range(Right):
-        pya.press('right') # Goes right depending on how much called
+    for Downs in range(Down): pya.press('down') # Goes down depending on how much called
+    for Rights in range(Right): pya.press('right') # Goes right depending on how much called
     time.sleep(0.5)
     pya.press('enter') # Confirms color selection
 

@@ -8,7 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys # Needed for sending keys
 
-def MyCSUAutoLogin(MyCSUUser,MyCSUPassword,TargetWebsite="",URL=""):
+def MyCSUAutoLogin(MyCSUUser,MyCSUPassword):
     options = Options() # Get options
     global driver
     driver = webdriver.Chrome(options=options) # Opens Chrome browser with options (if u put any)

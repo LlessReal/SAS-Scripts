@@ -87,7 +87,7 @@ def stop_function():
     global running
     running = False
     
-Tools.BrowserControl.MyCSUAutoLogin(config.MyCSUUser,config.MyCSUPassword,TargetWebsite="Excel",URL=config.ExcelDocURL)
+Tools.BrowserControl.MyCSUAutoLogin(config.MyCSUUser,config.MyCSUPassword)
 while True:
     try:
         print("Click the first box, then press ctrl+shift+f to commense and press ctrl+shift+v to stop.")

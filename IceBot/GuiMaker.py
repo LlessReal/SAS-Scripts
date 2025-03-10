@@ -8,7 +8,7 @@ import os, threading, SchizoRadio, pygame, sys
 from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
 
 root = Tk(); root.title("IceBot Gui"); root.wait_visibility() 
-root.geometry("600x360")
+root.geometry("700x480")
 root.config(background="Gray")
 StopSetting = IntVar(); TestingBotToggle = IntVar()
 
@@ -113,13 +113,6 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     BrainrotModeToggleBox = Checkbutton(root, text="Brainrot Mode",variable=BrainrotModeToggle) 
     BrainrotModeToggleBox.grid(row=8 + NextInLine,column=2)
 
-    # Regular Mic Toggle Button
-    HeadsetandMicToggle = Button( root, text="Activate Headset and Mic", bg="purple",fg="white",command= lambda: MicrosoftTeamsChangeDevice("Listening to Client")) 
-    HeadsetandMicToggle.grid(row=9 + NextInLine,column=0)
-    # Stereo Mix Toggle Button
-    StereoandSpeakerToggle = Button( root, text="Activate Speakers and Stereo", bg="purple",fg="white",command= lambda:  MicrosoftTeamsChangeDevice("Speaking to Client")) 
-    StereoandSpeakerToggle.grid(row=9 + NextInLine,column=1)
-
     # Testing Bot Mode
     
     if StartingProgram: TestingBotToggle.set(0)
@@ -127,10 +120,16 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     TestingBotToggleBox.grid(row=9 + NextInLine,column=2)
     global InitiationThread
     InitiationThread = threading.Thread(target=lambda: StartFunction(TestingBotToggle.get(),StartingProgram=False))
-    
-    # Refresh Button
-    RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 
-    RefreshGuiButton.grid(row=10 + NextInLine,column=1)
+
+    # Regular Mic Toggle Button
+    HeadsetandMicToggle = Button( root, text="Get real mic", bg="purple",fg="white",command= lambda: MicrosoftTeamsChangeDevice("Switch to Human")) 
+    HeadsetandMicToggle.grid(row=10 + NextInLine,column=0)
+    # Stereo Mix Toggle Button
+    StereoandSpeakerToggle = Button( root, text="Get stereo", bg="purple",fg="white",command= lambda:  MicrosoftTeamsChangeDevice("Change to Stereo")) 
+    StereoandSpeakerToggle.grid(row=10 + NextInLine,column=1)
+
+    PrivateConvo = Button( root, text="Private Convo", bg="purple",fg="white",command= lambda:  MicrosoftTeamsChangeDevice("Listening to Client")) 
+    PrivateConvo.grid(row=10 + NextInLine,column=1)
 
     # Radio Toggle
     ToggleRadioButton = Button(root, text="Toggle Radio", bg="black",fg="white",command= lambda: SchizoRadio.RadioControl("On" if SchizoRadio.channel21.get_volume() == 0 else "Off")) 
@@ -144,6 +143,15 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     global AutoChangeSongToggle; AutoChangeSongToggle = IntVar(); AutoChangeSongToggle.set(0)
     AutoChangeSongButton = Checkbutton(root, text="Auto-Change Song",variable=AutoChangeSongToggle) 
     AutoChangeSongButton.grid(row=11 + NextInLine,column=2)
+
+    # Auto-Change Song
+    global WaitBeforeRadio; WaitBeforeRadio = IntVar(); WaitBeforeRadio.set(0)
+    WaitBeforeRadioButton = Checkbutton(root, text="Wait Before Turning on Radio",variable=WaitBeforeRadio) 
+    WaitBeforeRadioButton.grid(row=12 + NextInLine,column=0)
+
+    # Refresh Button
+    RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 
+    RefreshGuiButton.grid(row=13 + NextInLine,column=1)
 
     # Lastly...
     root.update()

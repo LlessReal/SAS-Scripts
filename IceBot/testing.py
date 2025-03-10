@@ -1,16 +1,14 @@
 from pywinauto import Application
 from pywinauto.timings import Timings
+import time
+import pyautogui as pya
 
 # Adjust timings if needed
 Timings.after_clickinput_wait = 2  # Add a delay after each click
 
-try:
-    # Step 1: Launch or connect to Microsoft Teams
-    app = Application(backend='uia').connect(title_re=".*Microsoft Teams.*")
-    print("Successfully connected to Microsoft Teams!")
 
-    # Step 2: Get the main window of the application
-    main_window = app.window(title_re=".*Microsoft Teams.*")
+    #main_window.print_control_identifiers()
+    time.sleep(1000)
     
     # Check if the main window is found
     if main_window.exists():

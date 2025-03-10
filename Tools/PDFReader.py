@@ -28,9 +28,7 @@ def NewOCR(AramarkInvoice):
     Tools.BrowserControl.driver.get("https://www.newocr.com/")
     Tools.BrowserControl.CommitActionOnElement("//input[@id='userfile']",AramarkInvoice)
     
-    PreviewButton = Tools.BrowserControl.driver.find_element(By.XPATH, "//button[@id='preview']") 
-    PreviewButton.click()
-
+    Tools.BrowserControl.driver.find_element(By.XPATH, "//button[@id='preview']").click() 
     Tools.BrowserControl.CommitActionOnElement("//button[@id='ocr']","ClickElement") 
     
     return Tools.BrowserControl.CommitActionOnElement("//textarea[@id='ocr-result']","Grab Text") 

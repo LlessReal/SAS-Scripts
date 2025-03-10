@@ -3,7 +3,7 @@ import os, random, wave, pyaudio, pygame, datetime
 from config import VoicelineFolderName, CurrentPath 
 from pydub import AudioSegment # Play sound from soundboard
 from MicrosoftTeamsControl import MicrosoftTeamsChangeDevice
-import MicrosoftTeamsControl
+import MicrosoftTeamsControl, SchizoRadio
 AudioSegment.converter = fr'{CurrentPath}\ffmpeg' # Change audio speed thing yeaaaaaa
 
 def ChangeAudio(input_file_path, output_file_path, speed):
@@ -73,6 +73,7 @@ def PlayWaveFile(WavFile):
 
 # Play voice line from character folder
 def playVoiceLine(VoicelineType):
+    SchizoRadio.RadioControl("Off")
     try:
         UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
         pya.click(UnMuteAvailable) # Unmute myself to hear caller  
