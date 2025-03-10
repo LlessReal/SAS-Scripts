@@ -145,9 +145,9 @@ def makeTransferGui(TheCallersWords="",ResettingGui=True,StartingProgram=False,B
     AutoChangeSongButton.grid(row=11 + NextInLine,column=2)
 
     # Auto-Change Song
-    global WaitBeforeRadio; WaitBeforeRadio = IntVar(); WaitBeforeRadio.set(0)
-    WaitBeforeRadioButton = Checkbutton(root, text="Wait Before Turning on Radio",variable=WaitBeforeRadio) 
-    WaitBeforeRadioButton.grid(row=12 + NextInLine,column=0)
+    global WaitBeforeContinuing; WaitBeforeContinuing = IntVar(); WaitBeforeContinuing.set(0)
+    WaitBeforeContinuingButton = Checkbutton(root, text="Wait Before Continuing",variable=WaitBeforeContinuing) 
+    WaitBeforeContinuingButton.grid(row=12 + NextInLine,column=0)
 
     # Refresh Button
     RefreshGuiButton = Button(root, text="Refresh Gui", bg="red",fg="white",command= lambda: makeTransferGui(TheCallersWords="",StartingProgram=StartingProgram)) 

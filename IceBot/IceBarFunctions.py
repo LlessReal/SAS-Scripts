@@ -1,5 +1,6 @@
 import pyautogui as pya
 from time import sleep
+import time
 from OtherFunctions import CloseWindow
 # Selenium
 import speech_recognition as sr
@@ -36,6 +37,31 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
     CloseWindow("(External)")
     print(" Transfer Successful! Returning to initial location"); pya.moveTo(InitialPosition) # # Go to OG position
 
+
+def wait_for_silence(recognizer, source, silence_duration=5, silence_threshold=1000):
+    """
+    Waits until there is silence for a specified duration.
+    
+    :param recognizer: The recognizer instance.
+    :param source: The audio source.
+    :param silence_duration: The duration of silence to wait for (in seconds).
+    :param silence_threshold: The energy threshold to consider as silence.
+    :return: True if silence is detected, False if timeout occurs.
+    """
+    start_time = time.time()
+    while True:
+        print("Listening...")
+        audio = recognizer.listen(source, timeout=1)  # Listen for 1 second
+        energy = sum(abs(audio.get_raw_data())) / len(audio.get_raw_data())
+        
+        if energy < silence_threshold:
+            print("Silence detected.")
+            if time.time() - start_time >= silence_duration: return True
+        else: start_time = time.time()  # Reset the timer if sound is detected
+        
+        # Overall timeout to prevent infinite loop
+        if time.time() - start_time > 30: print("Timeout occurred."); return False
+
 # Gets caller's message
 def getCallerMessage():   
     recognizer = sr.Recognizer() # Initiate Recognizer
@@ -43,7 +69,11 @@ def getCallerMessage():
     AskedtoSpeakAlready = False
     with microphone as source: # Gets mic to listen to
         while True:
+            recognizer.adjust_for_ambient_noise(source)
             print("Now Listening to Caller.....")
+            #print("Waiting for silence...")
+            #if wait_for_silence(recognizer, source, silence_duration=5): print("Silence detected for 5 seconds.")
+            #else: print("Silence not detected within the timeout period.")
             try: audio = recognizer.listen(source, timeout=30) # Listens to customer's yap
             except sr.WaitTimeoutError:
                 print("No message detected.")
