@@ -2,7 +2,7 @@ import pyautogui as pya
 from time import sleep
 from config import CurrentPath, api_key
 import GuiMaker, SoundFunctions, IceBarFunctions, BotMessaging
-
+import pygetwindow as gw
 def StartFunction(TestingBot,StartingProgram):
     GuiMaker.makeTransferGui()
     if not StartingProgram:
@@ -18,23 +18,19 @@ def StartFunction(TestingBot,StartingProgram):
                     try: 
                         # Tries to detect blue calling button that appears when someone calls
                         SomeoneCalling = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\SomeoneCalling.png') 
-                        print("Someone is calling!")  # If we passed this stage
-                        CallInactive = False # Reset CallInactive if it's True and we're past the other stae
-                        pya.click(SomeoneCalling) # Clicks the button
-                        break # Onto next stage
+                        print("Someone is calling!"); pya.click(SomeoneCalling); break  # If we passed this stage
                     except Exception as e:
                         if CallInactive == False: print("Waiting for Answer Button to be active....") # This is so it won't be spammed.
                         CallInactive = True # needed to not make above message spam
                         sleep(0.1)
+                CallInactive = False
                 # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
-                while True: 
-                    try: # Uses mute button to determine if call started
-                        pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\PersonIcon.png') # Checks to see if mute option is available 
-                        print("Call has started !!")
-                        SoundFunctions.GeneralGreeting(); break # Greets and break out
-                    except:
-                        if CallInactive == False: print("Waiting for call to load..."); CallInactive = True # This is so it won't be spammed.
-        
+                while True:
+                    try: gw.getWindowsWithTitle("(External)")[0]; break
+                    except: 
+                        if CallInactive == False: print("Waiting for call to load..."); CallInactive = True
+                print("Call has started !!"); SoundFunctions.GeneralGreeting(); break # Greets and break out
+     
             GatherCallersInfo() # Grab Info From Caller
 
 # Repeat

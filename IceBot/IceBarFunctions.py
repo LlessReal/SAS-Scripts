@@ -35,30 +35,22 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
     # Tries to press the dropdown
     TransferToNumber(TransferNumber) 
     CloseWindow("(External)")
-    print(" Transfer Successful! Returning to initial location"); pya.moveTo(InitialPosition) # # Go to OG position
+    print("Transfer Successful! Returning to initial location"); pya.moveTo(InitialPosition) # # Go to OG position
 
 
 def wait_for_silence(recognizer, source, silence_duration=5, silence_threshold=1000):
     """
-    Waits until there is silence for a specified duration.
-    
-    :param recognizer: The recognizer instance.
-    :param source: The audio source.
-    :param silence_duration: The duration of silence to wait for (in seconds).
     :param silence_threshold: The energy threshold to consider as silence.
     :return: True if silence is detected, False if timeout occurs.
     """
     start_time = time.time()
     while True:
-        print("Listening...")
         audio = recognizer.listen(source, timeout=1)  # Listen for 1 second
         energy = sum(abs(audio.get_raw_data())) / len(audio.get_raw_data())
-        
-        if energy < silence_threshold:
+        if energy < silence_threshold: # We silent with this one
             print("Silence detected.")
             if time.time() - start_time >= silence_duration: return True
-        else: start_time = time.time()  # Reset the timer if sound is detected
-        
+        else: start_time = time.time() # Reset timer if sound was detected
         # Overall timeout to prevent infinite loop
         if time.time() - start_time > 30: print("Timeout occurred."); return False
 
@@ -69,8 +61,8 @@ def getCallerMessage():
     AskedtoSpeakAlready = False
     with microphone as source: # Gets mic to listen to
         while True:
-            recognizer.adjust_for_ambient_noise(source)
             print("Now Listening to Caller.....")
+            #recognizer.adjust_for_ambient_noise(source)
             #print("Waiting for silence...")
             #if wait_for_silence(recognizer, source, silence_duration=5): print("Silence detected for 5 seconds.")
             #else: print("Silence not detected within the timeout period.")

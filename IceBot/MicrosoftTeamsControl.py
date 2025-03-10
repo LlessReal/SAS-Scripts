@@ -30,6 +30,8 @@ def ChangeInputandOutput(Action):
         speaker_combo.type_keys("{ENTER}")
         #MuteButton = icebarwindow.child_window(title="Mute", auto_id="MuteButton_1", control_type="Button")
         #MuteButton.click_input()
+        #UnmuteButton = icebarwindow.child_window(title="Unmute", auto_id="UnmuteButton_1", control_type="Button")
+        #UnmuteButton.click_input()
     elif Action == "Change to Stereo":
         speaker_combo = teams_window.child_window(control_type="ComboBox", found_index=2)  # Adjust index if necessary
         speaker_combo.expand()
