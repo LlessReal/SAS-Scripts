@@ -74,10 +74,6 @@ def PlayWaveFile(WavFile):
 # Play voice line from character folder
 def playVoiceLine(VoicelineType):
     SchizoRadio.RadioControl("Off")
-    try:
-        UnMuteAvailable = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\UnMuteAvailable.png') # Checks to see if mute option is available
-        pya.click(UnMuteAvailable) # Unmute myself to hear caller  
-    except: pass
     if not MicrosoftTeamsControl.SpeakingToClient: MicrosoftTeamsChangeDevice("Speaking to Client") 
 
     AllVoicelines = [] # List Initialization

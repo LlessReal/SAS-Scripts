@@ -7,10 +7,8 @@ def StartFunction(TestingBot,StartingProgram):
     GuiMaker.makeTransferGui()
     if not StartingProgram:
         ###### PHASE 1 - Greeting
-        while True:
-            if TestingBot: # If testing, will use regular mic, then go straight to general greeting
-                print("Testing Mode On. Program starts in 5 seconds"); sleep(5)
-                SoundFunctions.GeneralGreeting() # Good Morning/Afternoon and then the greeting
+        while True: # May delete later
+            if TestingBot: print("Testing Mode On. Program starts in 5 seconds"); sleep(5)
             else: # If not testing
                 # Wait for person to call
                 CallInactive = False # Apart of message showing functionality to not have wait message spammedCallInactive = False # Apart of message showing functionality to not have wait message spammed
@@ -29,8 +27,7 @@ def StartFunction(TestingBot,StartingProgram):
                     try: gw.getWindowsWithTitle("(External)")[0]; break
                     except: 
                         if CallInactive == False: print("Waiting for call to load..."); CallInactive = True
-                print("Call has started !!"); SoundFunctions.GeneralGreeting(); break # Greets and break out
-     
+            print("Call has started !!"); SoundFunctions.GeneralGreeting() # Greets and break out     
             GatherCallersInfo() # Grab Info From Caller
 
 # Repeat
