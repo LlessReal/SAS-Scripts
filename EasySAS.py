@@ -1,6 +1,6 @@
 import sys, os
-FolderPath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Tools'))
-if FolderPath not in sys.path: sys.path.append(FolderPath)
+ToolsPath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'Tools'))
+if ToolsPath not in sys.path: sys.path.append(ToolsPath)
 
 Choice = int(input("Choose Your Program: 1 - eKnight 2 - eProGottaGo"))
 

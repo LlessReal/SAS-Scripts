@@ -1,6 +1,6 @@
 import pyautogui as pya
 from time import sleep
-from config import CurrentPath, api_key
+from config import CurrentPath
 import GuiMaker, SoundFunctions, IceBarFunctions, BotMessaging
 import pygetwindow as gw
 def StartFunction(TestingBot,StartingProgram):
@@ -35,6 +35,7 @@ def GatherCallersInfo(SayRepeatVoiceLine=0,NeedMoreInfo=False):
     # Asks caller to repeat what they said if this is on
     if SayRepeatVoiceLine == 1: SoundFunctions.playVoiceLine("Repeat")
     CallersMessage = IceBarFunctions.getCallerMessage() 
+    if CallersMessage == "Left the Call": return
     if NeedMoreInfo == False: DetailsExplained = f"A caller has said the following message: {CallersMessage}\nRespond to the caller's message"
     else: DetailsExplained = f"The caller has responded with the following message: {CallersMessage}\nRespond to the caller's message"
     BotMessaging.GenerateBotResponse(DetailsExplained)

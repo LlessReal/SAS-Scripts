@@ -6,6 +6,8 @@ from OtherFunctions import CloseWindow
 import speech_recognition as sr
 from config import model, CurrentPath
 import SoundFunctions, SchizoRadio
+import numpy as np
+
 
 # Function to press a button on IceBar (other than the drop down)
 from pywinauto import Application
@@ -54,29 +56,59 @@ def wait_for_silence(recognizer, source, silence_duration=5, silence_threshold=1
         # Overall timeout to prevent infinite loop
         if time.time() - start_time > 30: print("Timeout occurred."); return False
 
+
+recognizer,microphone = sr.Recognizer(), sr.Microphone() # Initiate Recognizer and Mic
 # Gets caller's message
 def getCallerMessage():   
-    recognizer = sr.Recognizer() # Initiate Recognizer
-    microphone = sr.Microphone() # Initiate Mic
     AskedtoSpeakAlready = False
     with microphone as source: # Gets mic to listen to
         while True:
             print("Now Listening to Caller.....")
             #recognizer.adjust_for_ambient_noise(source)
             #print("Waiting for silence...")
-            #if wait_for_silence(recognizer, source, silence_duration=5): print("Silence detected for 5 seconds.")
+            #if wait_for_silence(recognizer, source, silence_duration=3): print("Silence detected for 5 seconds.")
             #else: print("Silence not detected within the timeout period.")
-            try: audio = recognizer.listen(source, timeout=30) # Listens to customer's yap
-            except sr.WaitTimeoutError:
+            fullaudio = b''
+            audio = b''
+            # Listen to customer's yap
+            FirstWords = True
+            while True:
+                try: 
+                    recognizer.adjust_for_ambient_noise(source)
+                    # Waits for em to talk (waits 5 seconds if first message, 1 if they said something already)
+                    audio = recognizer.listen(source,timeout=5 if FirstWords else 1)
+                    # If they said nothing, the code below won't go
+                    audiodata = audio.get_raw_data()
+                    # Calculate energy
+                    samples = np.frombuffer(audiodata, dtype=np.int16)  # Use correct dtype
+                    energy = np.mean(np.abs(samples))
+                    print(f"Energy: {energy}")
+                    # If nothing was meant to be said, break out
+                    if energy < 200: break 
+                    # Otherwise, we'll add to the full audio
+                    fullaudio += audiodata # Add to full data 
+                    combined_audio = sr.AudioData(fullaudio, audio.sample_rate, audio.sample_width)
+                    FirstWords = False # No longer their first words
+                # If they don't talk, we break, thus nothing is added to the audio
+                except sr.WaitTimeoutError: break 
+            
+            print("No more audio detected, stopped recording."); SchizoRadio.RadioControl("On")
+            if audio == b'': # If we didn't get any new audio data, they said nothing
                 print("No message detected.")
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                 AskedtoSpeakAlready = True
-                if LeaveCallNotice == "Left the Call": return
+                if LeaveCallNotice == "Left the Call": return LeaveCallNotice
                 else: continue
-            
-            print("Stopped recording"); SchizoRadio.RadioControl("On")
+
+            # Next stage
             try: # Try to save their message
-                with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as file: file.write(audio.get_wav_data())
+                # Boost audio
+                raw_data = np.frombuffer(combined_audio.get_raw_data(), dtype=np.int16) # Convert raw audio data to a NumPy array
+                boosted_data = (raw_data * 1.5).astype(np.int16) # Boost the audio by multiplying with the gain factor
+                boosted_data = np.clip(boosted_data, -32768, 32767) # Clip the data to ensure it stays within the valid range for int16
+                boosted_bytes = boosted_data.tobytes() # Convert the boosted data back to bytes
+                boosted_audio = sr.AudioData(boosted_bytes, audio.sample_rate, audio.sample_width) # Create a new AudioData object with the boosted audio
+                with open(fr"{CurrentPath}\Caller's Message\CallersMessage.wav", "wb") as soundfile: soundfile.write(boosted_audio.get_wav_data())
                 print("Audio saved as CallersMessage.wav")
             except Exception as e: print(f"Unable to save audio somehow {e}")
             try: # Tries to transcribe audio
@@ -89,17 +121,18 @@ def getCallerMessage():
                     LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                     AskedtoSpeakAlready = True
                     if LeaveCallNotice == "Left the Call": return LeaveCallNotice
+                    else: continue
                 return result["text"] # Returns the transcript for the user
             except Exception as e:
                 print("Failed to recognize audio", e)
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
                 AskedtoSpeakAlready = True
                 if LeaveCallNotice == "Left the Call": return LeaveCallNotice
-            
+                else: continue
 
 # Function that asks caller to repeat what they said
 def PleaseRepeat(AskedtoSpeakAlready):
     if AskedtoSpeakAlready: # If we tried this already
-        SoundFunctions.playVoiceLine("Goodbye"); CloseWindow("(External)"); return "Left the Call"
+        print("Caller is absent, leaving call..."); SoundFunctions.playVoiceLine("Goodbye"); CloseWindow("(External)"); return "Left the Call"
     else: SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
 # Make AskedtoSpeakAlready = True and add a continue after this function

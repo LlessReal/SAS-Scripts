@@ -13,8 +13,7 @@ def main():
     FormerReqID = ""
     while running:
         # Check Former Req ID
-        if FormerReqID != "":
-            print(f"Former ID was {FormerReqID}")  
+        if FormerReqID != "": print(f"Former ID was {FormerReqID}")  
 
         # You better have clicked a box at this point
         # Grab Req ID
@@ -27,20 +26,14 @@ def main():
             if EmptyCounter == 10:
                 print("10 Empty Boxes detected, stopping program")
                 running = False # If we got 10 empty boxes, exit program, we done
-            else:
-                continue # Go back to program
+            else: continue # Go back to program
         else:
             EmptyCounter = 0 # If it wasn't empty, there's more info
 
         # If the box was Unknown
-        if ReqID == "Unknown":
-            BoxManipulation.MarkUnknown() # Mark unknown
-            continue
+        if ReqID == "Unknown": BoxManipulation.MarkUnknown(); continue
 
-        if ReqID == "Cool Down":
-            print("Cooling down....")
-            time.sleep(30)
-            continue
+        if ReqID == "Cool Down": print("Cooling down...."); time.sleep(30); continue
 
         # Checking for Duplicates
         if ReqID in FormerReqID: # If we got the same ID from before
@@ -78,14 +71,10 @@ def main():
     print("The code has halted.")
 
 def start_function():
-    global running
-    running = True
-    thread = threading.Thread(target=main)
-    thread.start()
+    global running; running = True
+    thread = threading.Thread(target=main); thread.start()
 
-def stop_function():
-    global running
-    running = False
+def stop_function(): global running; running = False
     
 Tools.BrowserControl.MyCSUAutoLogin(config.MyCSUUser,config.MyCSUPassword)
 while True:

@@ -26,20 +26,13 @@ def main():
             if EmptyCounter == 10:
                 print("10 Empty Boxes detected, stopping program")
                 running = False # If we got 10 empty boxes, exit program, we done
-            else:
-                continue # Go back to program
-        else:
-            EmptyCounter = 0 # If it wasn't empty, there's more info
+            else: continue # Go back to program
+        else: EmptyCounter = 0 # If it wasn't empty, there's more info
 
         # If the box was Unknown
-        if ReqID == "Unknown":
-            BoxManipulation.MarkUnknown()
-            continue
+        if ReqID == "Unknown": BoxManipulation.MarkUnknown(); continue
 
-        if ReqID == "Cool Down":
-            print("Cooling down....")
-            time.sleep(30)
-            continue
+        if ReqID == "Cool Down": print("Cooling down...."); time.sleep(30); continue
 
         # Checking for Duplicates
         if ReqID in FormerReqID: # If we got the same ID from before
@@ -58,23 +51,18 @@ def main():
         BoxManipulation.MoveBoxes("N/A")
         pya.hotkey("ctrl","c") # Copies box from N/A Column
         time.sleep(0.5) # Same reason as b4
-        if pc.paste() == "N/A" or "SR" in pc.paste(): # If already marked as N/A or if a SR number is in it already
-            BoxManipulation.MoveBoxes("Req ID") # Next Req ID
-            continue
+        # If already marked as N/A or if a SR number is in it already
+        if pc.paste() == "N/A" or "SR" in pc.paste(): BoxManipulation.MoveBoxes("Req ID"); continue # Next Req ID
         else: # If empty
             SRSearch = BoxManipulation.CheckForSRNum(ReqID) # Checks if there's a SR Number     
-            if SRSearch == "No SR": # If no SR was deemed to be found
-                BoxManipulation.MarkNA() # Mark as N/A
+            if SRSearch == "No SR": BoxManipulation.MarkNA() # # If no SR was deemed to be found Mark as N/A
             elif SRSearch == "SR Found": # If SR was found
                 # Get current color fro mfile
-                with open(f"{CurrentPath}\\NextColor.txt","r") as f:
-                    CurrentColor = f.read()
+                with open(f"{CurrentPath}\\NextColor.txt","r") as f: CurrentColor = f.read()
                 # Write next color name
                 with open(f"{CurrentPath}\\NextColor.txt","w") as f2:
-                    try: # Tries to write down the next color
-                        f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1])
-                    except: # Resets if at max
-                        f2.write(config.AllColors[0])
+                    try: f2.write(config.AllColors[config.AllColors.index(CurrentColor) + 1]) # Tries to write down the next color
+                    except: f2.write(config.AllColors[0]) # Resets if at max
             
                 BoxManipulation.AddSRNum(ReqID) # Add the SR Number (need to the Req ID to do so)
             FormerReqID = f"{ReqID} (SR Found)" if SRSearch == "SR Found" else f"{ReqID} (No SR Found)"
@@ -86,14 +74,10 @@ def main():
     print("The code has halted.")
 
 def start_function():
-    global running
-    running = True
-    thread = threading.Thread(target=main)
-    thread.start()
+    global running; running = True
+    thread = threading.Thread(target=main); thread.start()
 
-def stop_function():
-    global running
-    running = False
+def stop_function(): global running; running = False
 
 while True:
     try:
@@ -101,6 +85,4 @@ while True:
         keyboard.add_hotkey("ctrl+shift+f", start_function)
         keyboard.add_hotkey("ctrl+shift+v", stop_function)
         keyboard.wait()
-    except:
-        print("it stopped")
-        pass
+    except: print("it stopped")

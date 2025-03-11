@@ -1,5 +1,6 @@
-import os
-
+import os,sys
+ToolsPath = os.path.abspath(os.path.join(os.path.dirname(__file__),'..', 'Tools'))
+if ToolsPath not in sys.path: sys.path.append(ToolsPath)
 # Post Config
 CurrentPath = os.path.dirname(__file__) 
 MyCSUUser, MyCSUPassword = "marshall_miguel@columbusstate.edu", "Ll3ss1@3$5^Ll3ss1@3$5^"
