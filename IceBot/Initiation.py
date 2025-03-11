@@ -15,10 +15,10 @@ def StartFunction(TestingBot,StartingProgram):
                 while True:
                     try: 
                         # Tries to detect blue calling button that appears when someone calls
-                        SomeoneCalling = pya.locateOnScreen(fr'{CurrentPath}\..\IceBarImages\SomeoneCalling.png') 
+                        SomeoneCalling = pya.locateOnScreen(fr'{CurrentPath}\SomeoneCalling.png') 
                         print("Someone is calling!"); pya.click(SomeoneCalling); break  # If we passed this stage
                     except Exception as e:
-                        if CallInactive == False: print("Waiting for Answer Button to be active....") # This is so it won't be spammed.
+                        if CallInactive == False: print("Waiting for Answer Button to be active...."); print(e) # This is so it won't be spammed.
                         CallInactive = True # needed to not make above message spam
                         sleep(0.1)
                 CallInactive = False

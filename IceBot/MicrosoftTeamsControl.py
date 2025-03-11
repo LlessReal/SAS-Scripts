@@ -11,8 +11,8 @@ def MicrosoftTeamsChangeDevice(Action=""):
 
 def ChangeInputandOutput(Action):
     # Launch or connect to Microsoft Teams
-    app = Application(backend='uia').connect(title_re=".*Settings.*")
-    teams_window = app.window(title_re=".*Settings.*")
+    app = Application(backend='uia').connect(title_re=".*Teams and Channels \\| Settings.*")
+    teams_window = app.window(title_re=".*Teams and Channels \\| Settings.*")
     #icebarapp = Application(backend='uia').connect(title_re=".*iceBar.*")
     #icebarwindow = icebarapp.window(title_re=".*iceBar.*")
     # Find and interact with the Speaker ComboBox

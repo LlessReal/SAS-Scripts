@@ -16,13 +16,6 @@ This both for the audio transcribing thing to work and the audio editing to work
 6. Get voicelines (Check other folders for examples)
 7. Wallah !! 
 
-run Get-PnpDevice -Class AudioEndpoint so that you can see all instance ids
-
-???
-Stop all sounds features
-Get-PnpDevice -Class AudioEndpoint | Where-Object { $_.FriendlyName -eq "Internal Microphone (Synaptics HD Audio)" } | Disable-PnpDevice -Confirm:$false
-Show Instance ID and stuff for certain microphone and shit
-Get-PnpDevice -Class AudioEndpoint | Where-Object { $_.FriendlyName -eq "Internal Microphone (Synaptics HD Audio)" } | Format-List FriendlyName, InstanceId
 It seems like a specific number will target someone depending on the measures
 February 17th 2025
 - Change Speed of Sound (I think)
@@ -32,10 +25,6 @@ February 17th 2025
 February 18th 2025
 - Refresh Gui (Can change up files around then refresh wink wink)
 
-git lfs install
-pip install pip==21.3.1
-pip install wheel setuptools pip --upgrade
-C:\Users\marshall_miguel\AppData\Local\Programs\Python\Python311\python.exe -m pip install wheel setuptools pip --upgrade
 
 pip install -vvv torch
 pip install numpy

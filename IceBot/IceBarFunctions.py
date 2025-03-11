@@ -7,11 +7,10 @@ import speech_recognition as sr
 from config import model, CurrentPath
 import SoundFunctions, SchizoRadio
 import numpy as np
-
-
+from MicrosoftTeamsControl import ChangeInputandOutput
 # Function to press a button on IceBar (other than the drop down)
 from pywinauto import Application
-app = Application(backend='uia').connect(title_re=".*Settings.*")
+app = Application(backend='uia').connect(title_re=".*Teams and Channels \\| Settings.*")
 
 def TransferToNumber(TransferNumber=0):
     try:
@@ -22,7 +21,7 @@ def TransferToNumber(TransferNumber=0):
     DropDown.click_input()
     TransferButton = main_window.child_window(title="Transfer", auto_id="TransferCallButton_1", control_type="Button")
     TransferButton.click_input()
-    sleep(5); pya.write(f"{TransferNumber} \n")
+    sleep(5); pya.write(f"{TransferNumber} \n"); sleep(1)
 
 # Function that transfers the users
 def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingProgram=False):
@@ -38,23 +37,6 @@ def AutoTransferSubmitVersion(TransferNumber,SayVoiceLine,WaitBeforeGo,StartingP
     TransferToNumber(TransferNumber) 
     CloseWindow("(External)")
     print("Transfer Successful! Returning to initial location"); pya.moveTo(InitialPosition) # # Go to OG position
-
-
-def wait_for_silence(recognizer, source, silence_duration=5, silence_threshold=1000):
-    """
-    :param silence_threshold: The energy threshold to consider as silence.
-    :return: True if silence is detected, False if timeout occurs.
-    """
-    start_time = time.time()
-    while True:
-        audio = recognizer.listen(source, timeout=1)  # Listen for 1 second
-        energy = sum(abs(audio.get_raw_data())) / len(audio.get_raw_data())
-        if energy < silence_threshold: # We silent with this one
-            print("Silence detected.")
-            if time.time() - start_time >= silence_duration: return True
-        else: start_time = time.time() # Reset timer if sound was detected
-        # Overall timeout to prevent infinite loop
-        if time.time() - start_time > 30: print("Timeout occurred."); return False
 
 
 recognizer,microphone = sr.Recognizer(), sr.Microphone() # Initiate Recognizer and Mic
@@ -92,7 +74,7 @@ def getCallerMessage():
                 # If they don't talk, we break, thus nothing is added to the audio
                 except sr.WaitTimeoutError: break 
             
-            print("No more audio detected, stopped recording."); SchizoRadio.RadioControl("On")
+            print("No more audio detected, stopped recording."); ChangeInputandOutput("Speaking to Client"); SchizoRadio.RadioControl("On")
             if audio == b'': # If we didn't get any new audio data, they said nothing
                 print("No message detected.")
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)
@@ -135,4 +117,5 @@ def PleaseRepeat(AskedtoSpeakAlready):
     if AskedtoSpeakAlready: # If we tried this already
         print("Caller is absent, leaving call..."); SoundFunctions.playVoiceLine("Goodbye"); CloseWindow("(External)"); return "Left the Call"
     else: SoundFunctions.playVoiceLine("NoResponse") # Asks them to speak louder
+    ChangeInputandOutput("Listening to Client")
 # Make AskedtoSpeakAlready = True and add a continue after this function
