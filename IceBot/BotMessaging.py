@@ -20,7 +20,6 @@ If you need more information, let them know and then say '[NEED MORE INFO]' AT T
 {PhoneNumDetails}"""
 
 def GenerateBotResponse(DetailsExplained):
-    while GuiMaker.WaitBeforeContinuing.get() == 1: time.sleep(1)
     SoundFunctions.playVoiceLine("PleaseWait")
     if GuiMaker.AutoChangeSongToggle.get() == 1: SchizoRadio.RadioControl("Change Song")
     SchizoRadio.RadioControl("On")

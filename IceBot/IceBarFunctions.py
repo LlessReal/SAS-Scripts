@@ -10,7 +10,8 @@ import numpy as np
 from MicrosoftTeamsControl import ChangeInputandOutput
 # Function to press a button on IceBar (other than the drop down)
 from pywinauto import Application
-app = Application(backend='uia').connect(title_re=".*Teams and Channels \\| Settings.*")
+import GuiMaker
+app = Application(backend='uia').connect(title_re=".*\\| Settings \\|.*")
 
 def TransferToNumber(TransferNumber=0):
     try:
@@ -74,7 +75,10 @@ def getCallerMessage():
                 # If they don't talk, we break, thus nothing is added to the audio
                 except sr.WaitTimeoutError: break 
             
-            print("No more audio detected, stopped recording."); ChangeInputandOutput("Speaking to Client"); SchizoRadio.RadioControl("On")
+            print("No more audio detected, stopped recording."); 
+            ChangeInputandOutput("Speaking to Client"); 
+            while GuiMaker.WaitBeforeContinuing.get() == 1: time.sleep(1)
+            SchizoRadio.RadioControl("On")
             if audio == b'': # If we didn't get any new audio data, they said nothing
                 print("No message detected.")
                 LeaveCallNotice = PleaseRepeat(AskedtoSpeakAlready)

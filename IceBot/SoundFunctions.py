@@ -51,6 +51,7 @@ def playSound(SoundName,SpeedChange,BrainrotModeActivated,CharacterLine,ChannelP
             ChannelPicked.play(pygame.mixer.Sound(output_audio))  
             os.remove(output_audio)
         else: ChannelPicked.play(pygame.mixer.Sound(input_audio))  
+        MicrosoftTeamsChangeDevice("Listening to Client")
     except: print("No sound found. (bars)")
     
 # Play a wav file instead of an mp3 file
