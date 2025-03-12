@@ -1,7 +1,6 @@
 import pygame
 pygame.mixer.init(); pygame.mixer.set_num_channels(22)
-import os
-import GuiMaker
+import os, GuiMaker
 import sounddevice as sd
 from config import ViewAllDeviceNames
 

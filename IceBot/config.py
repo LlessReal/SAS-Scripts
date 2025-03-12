@@ -3,9 +3,9 @@ import os, whisper
 ViewAllDeviceNames = False # Btw , if this is on the program won't go
 VoicelineFolderName = "Mickey" # Add GoodAfternoon.wav, GoodMorning.wav, Greeting.wav (With numbers after), PleaseWait.wav, and Repeat.wav inside this folder
 ModelName = "sblight2"  # Replace with your desired Ollama model
-SpeakerName = "Speakers (Synaptics HD Audio)"
 api_key = ""
 openrouterapikey = ""
+
 # Incoming Audio Areas (Gotta press Tab 7 TImes to get to)
 SpeakerArea = 2 
 HeadPhoneArea = 1 

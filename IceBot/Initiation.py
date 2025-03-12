@@ -18,8 +18,7 @@ def StartFunction(TestingBot,StartingProgram):
                         SomeoneCalling = pya.locateOnScreen(fr'{CurrentPath}\SomeoneCalling.png') 
                         print("Someone is calling!"); pya.click(SomeoneCalling); break  # If we passed this stage
                     except Exception as e:
-                        if CallInactive == False: print("Waiting for Answer Button to be active...."); print(e) # This is so it won't be spammed.
-                        CallInactive = True # needed to not make above message spam
+                        if CallInactive == False: print("Waiting for Answer Button to be active....",e); CallInactive = True
                         sleep(0.1)
                 CallInactive = False
                 # Sub-Loop: Wait for release button to load (Signifies that the call has loaded)
@@ -27,6 +26,7 @@ def StartFunction(TestingBot,StartingProgram):
                     try: gw.getWindowsWithTitle("(External)")[0]; break
                     except: 
                         if CallInactive == False: print("Waiting for call to load..."); CallInactive = True
+                        sleep(0.1)
             print("Call has started !!"); SoundFunctions.GeneralGreeting() # Greets and break out     
             GatherCallersInfo() # Grab Info From Caller
 
