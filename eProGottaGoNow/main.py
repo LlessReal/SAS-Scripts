@@ -6,8 +6,7 @@ running = True
 
 CurrentPath = os.path.dirname(__file__) 
 def main():
-    print("Program starts in a sec (to get rid of shortcut bullshit)")
-    time.sleep(1)
+    print("Program starts in a sec (to get rid of shortcut bullshit)"); time.sleep(1)
     EmptyCounter = 0
     global running
     FormerReqID = ""
@@ -20,8 +19,7 @@ def main():
         ReqID = BoxManipulation.GrabReqID() # Gets Req ID from box, and stores it (and copies it as well)
         
         if ReqID == "Empty":
-            print("Empty Box")
-            pya.press("down") # Next, no coloring
+            print("Empty Box"); pya.press("down") # Next, no coloring
             EmptyCounter += 1
             if EmptyCounter == 10:
                 print("10 Empty Boxes detected, stopping program")
@@ -31,17 +29,16 @@ def main():
 
         # If the box was Unknown
         if ReqID == "Unknown": BoxManipulation.MarkUnknown(); continue
-
         if ReqID == "Cool Down": print("Cooling down...."); time.sleep(30); continue
 
         # Checking for Duplicates
         if ReqID in FormerReqID: # If we got the same ID from before
             if "(SR Found)" in FormerReqID: # If SR was found
                 print("A duplicate was found (SR Was Found in it)")
-                #BoxManipulation.AddSRNum(ReqID) # Mark as N/A and copies status as No SR Found
+                BoxManipulation.AddSRNum(ReqID) # Mark as N/A and copies status as No SR Found
             elif "(No SR Found)" in FormerReqID: # If no SR was found
                 print("A duplicate was found (No SR Found in it)")
-                #BoxManipulation.MarkNA() # Mark as N/A and copies status as No SR Found
+                BoxManipulation.MarkNA() # Mark as N/A and copies status as No SR Found
             BoxManipulation.MoveBoxes("N/A") # Goes to N/A Box
             BoxManipulation.CopyAbove()
             BoxManipulation.MoveBoxes("Req ID") # Returns to ReqID box, and goes to next row
@@ -49,8 +46,8 @@ def main():
         
         # Moving to N/A Box (If previous stage went good)
         BoxManipulation.MoveBoxes("N/A")
-        pya.hotkey("ctrl","c") # Copies box from N/A Column
-        time.sleep(0.5) # Same reason as b4
+        # Copies box from N/A Column
+        pya.hotkey("ctrl","c"); time.sleep(0.5) # Same reason as b4
         # If already marked as N/A or if a SR number is in it already
         if pc.paste() == "N/A" or "SR" in pc.paste(): BoxManipulation.MoveBoxes("Req ID"); continue # Next Req ID
         else: # If empty

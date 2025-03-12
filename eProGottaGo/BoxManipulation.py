@@ -1,5 +1,6 @@
 import pyperclip as pc
-import config, time, re, Tools.BrowserControl, Tools.PDFReader
+import config, re, Tools.BrowserControl, Tools.PDFReader
+from time import sleep
 # Selenium
 from selenium.webdriver.common.keys import Keys # Needed for sending keys
 
@@ -16,28 +17,21 @@ if AllTextFromeProDoc == "":
 def FillColor(Down,Right):
     Tools.BrowserControl.actions.send_keys(Keys.ALT).perform()
     Tools.BrowserControl.actions.send_keys("hh").perform()
-    time.sleep(0.5) # Wait a bit for box to load
+    sleep(0.5) # Wait a bit for box to load
     Tools.BrowserControl.QuickPress("Enter")
-    for Downs in range(Down):
-        Tools.BrowserControl.QuickPress("Down")
-        time.sleep(0.25)
-    for Rights in range(Right):
-        Tools.BrowserControl.QuickPress("Right")
-        time.sleep(0.25)
-    time.sleep(0.5)
+    for Downs in range(Down): Tools.BrowserControl.QuickPress("Down"); sleep(0.25)
+    for Rights in range(Right): Tools.BrowserControl.QuickPress("Right"); sleep(0.25)
+    sleep(0.5)
     Tools.BrowserControl.QuickPress("Enter")
 
 # Parses out ReqID and copies it
 def GrabReqID():
     Tools.BrowserControl.QuickPress("Copy") # Copies Req ID Column text
-    time.sleep(0.5) # Wait a sec to process, or else it stores "gain" for some goddamn reason
+    sleep(0.5) # Wait a sec to process, or else it stores "gain" for some goddamn reason
     ReqIDColumnText = pc.paste()
-    if ReqIDColumnText.replace(" ","") == "":
-        return "Empty"
-    elif ReqIDColumnText == "Retrieving data. Wait a few seconds and try to cut or copy again.":
-        return "Cool Down"
-    elif "00005" not in ReqIDColumnText:
-        return "Unknown"
+    if ReqIDColumnText.replace(" ","") == "": return "Empty"
+    elif ReqIDColumnText == "Retrieving data. Wait a few seconds and try to cut or copy again.": return "Cool Down"
+    elif "00005" not in ReqIDColumnText: return "Unknown"
     
     ParsedReqID = ReqIDColumnText[ReqIDColumnText.find("5") - 4:] # Gets only the last few numbers (Finds 5, goes back to get 0s). Stops where a dash is located cuz irrelevant info
     if "-" in ParsedReqID:
@@ -49,7 +43,7 @@ def GrabReqID():
 def MarkNA(): # Put in coordinates of where the N/A should be written
     Tools.BrowserControl.actions.send_keys(f"N/A\n").perform() 
     Tools.BrowserControl.QuickPress("Up")  # Goes back to OG box
-    FillColor(6,1) # Marks red
+    #FillColor(6,1) # Marks red
 
 def MarkUnknown():
     print("Unknown Box.")
@@ -57,7 +51,7 @@ def MarkUnknown():
     Tools.BrowserControl.actions.send_keys(f"Unknown\n").perform() 
     Tools.BrowserControl.QuickPress("Up")
     MoveBoxes("Req ID") # Goes to N/A Box
-    FillColor(6,0) # Marks dark red
+    #FillColor(6,0) # Marks dark red
 
 # Function that adds SR Number to box
 def AddSRNum(ReqID):

@@ -11,7 +11,5 @@ AllColors = ["Orange","Yellow","Green","Blue","Purple"]
 
 try:
     open(f"{CurrentPath}\\NextColor.txt","x").close()
-    with open(f"{CurrentPath}\\NextColor.txt","w") as f:
-        f.write("Orange")
-except:
-    pass
+    with open(f"{CurrentPath}\\NextColor.txt","w") as f: f.write("Orange")
+except: pass
