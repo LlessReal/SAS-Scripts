@@ -96,13 +96,15 @@ def FindCompanyEmail(CompanyName):
     time.sleep(5)
     OrderText = Tools.PDFReader.NewOCR(f"{config.DownloadsPath}\\{Tools.BrowserControl.driver.title}")
     
-    PotentialEmails = re.findall(r'\b\w*@\w*\b', OrderText)
+    #PotentialEmails = set([Email for Email in re.findall(r'\b\w*@\w*\b', OrderText) if "columbusstate" not in Email])
+    PotentialEmails = set([Email for Email in re.findall(r'\b[\w.-]+@[\w.-]+\.\w+\b', OrderText) if "columbusstate" not in Email])
     print(f"All Emails: {PotentialEmails}")
     Tools.BrowserControl.driver.close()
     Tools.BrowserControl.driver.switch_to.window(Tools.BrowserControl.driver.window_handles[3])
     Tools.BrowserControl.driver.close()
     # If no emails found, marks cell as N/A, else it will put email 
     # (if multiple, will be multiple columns)
+    # houser@team, legal@team
     if PotentialEmails == []: print("No emails found"); InputValue("N/A")
     else: 
         for Email in PotentialEmails: InputValue(Email,NextRow=False)

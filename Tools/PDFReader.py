@@ -43,7 +43,8 @@ def NewOCR(Document):
     OptionsList = [dropdownoption.text for dropdownoption in pagenumdropdown.options]
     for option in OptionsList: 
         pagenumdropdown = Select(Tools.BrowserControl.driver.find_element(By.XPATH, "//select[@id='page']"))
-        pagenumdropdown.select_by_visible_text(option); sleep(2)
+        pagenumdropdown.select_by_visible_text(option); sleep(15)
+        Tools.BrowserControl.CommitActionOnElement("//button[@id='ocr']","ClickElement") 
         AllOCRText += Tools.BrowserControl.CommitActionOnElement("//textarea[@id='ocr-result']","Grab Text") 
     return AllOCRText
 
