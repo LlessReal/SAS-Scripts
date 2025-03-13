@@ -14,6 +14,7 @@ if ToolsPath not in sys.path: sys.path.append(ToolsPath)
 SASPath = os.path.abspath(os.path.join(os.path.dirname(__file__),'..'))
 if SASPath not in sys.path: sys.path.append(SASPath)
 import Tools.BrowserControl
+import Tools.PDFReader
 
 # Initiation
 Tools.BrowserControl.MyCSUAutoLogin(config.MyCSUUser,config.MyCSUPassword)
@@ -79,20 +80,26 @@ def FindCompanyEmail(CompanyName):
     Tools.BrowserControl.wait.until(EC.presence_of_element_located((By.XPATH,"//ul[@role='group' and @id='file']")))
     ListofDocs = Tools.BrowserControl.driver.find_element(By.XPATH,"//ul[@role='group' and @id='file']")
     # Tries to find and click pdf file
-    try:
-        print("Found a PDF document !!")
-        FirstPDFDocFound = ListofDocs.find_element(By.XPATH,".//li[@data-tooltip='true' and contains(@class,'noWrap') and contains(text(),'pdf')]")
-        FirstPDFDocFound.click()
+    try: Tools.BrowserControl.CommitActionOnElement("//span[contains(text(),'pdf')]","ClickElement",SuccessMessage="Found a PDF document !!") # Press Attachments button
     # If it failed, will just skip the box
     except: print("No PDF Doc found"); InputValue("Skip Box") # Skip the box if found no
 
     # Heads to tab
-    Tools.BrowserControl.wait.until(EC.number_of_windows_to_be(4)); time.sleep(3)
+    Tools.BrowserControl.wait.until(EC.number_of_windows_to_be(4)); 
     Tools.BrowserControl.driver.switch_to.window(Tools.BrowserControl.driver.window_handles[3])
-    ScreenReadTextField = Tools.BrowserControl.driver.find_element(By.XPATH,"//div[contains(@class,'screenReader')]")
-    # Find all potential emails and then close tab containing pdfs
-    PotentialEmails = re.findall(r'\b\w*@\w*\b', ScreenReadTextField.text)
+    # Opens Acrobat
+    Tools.BrowserControl.CommitActionOnElement("//span[contains(@class,'ms-Button-label') and contains(text(),'Open')]","ClickElement")
+    Tools.BrowserControl.CommitActionOnElement("//span[contains(@class,'ms-ContextualMenu-itemText') and contains(text(),'Open in Adobe Acrobat')]","ClickElement")
+    Tools.BrowserControl.wait.until(EC.number_of_windows_to_be(5)); 
+    Tools.BrowserControl.driver.switch_to.window(Tools.BrowserControl.driver.window_handles[4])
+    Tools.BrowserControl.CommitActionOnElement("//button[@aria-label='Download this document']","ClickElement")
+    time.sleep(5)
+    OrderText = Tools.PDFReader.NewOCR(f"{config.DownloadsPath}\\{Tools.BrowserControl.driver.title}")
+    
+    PotentialEmails = re.findall(r'\b\w*@\w*\b', OrderText)
     print(f"All Emails: {PotentialEmails}")
+    Tools.BrowserControl.driver.close()
+    Tools.BrowserControl.driver.switch_to.window(Tools.BrowserControl.driver.window_handles[3])
     Tools.BrowserControl.driver.close()
     # If no emails found, marks cell as N/A, else it will put email 
     # (if multiple, will be multiple columns)
@@ -100,7 +107,7 @@ def FindCompanyEmail(CompanyName):
     else: 
         for Email in PotentialEmails: InputValue(Email,NextRow=False)
         Tools.BrowserControl.QuickPress("Down")
-        Tools.BrowserControl.QuickPress("Left") * len(PotentialEmails)
+        for Email in PotentialEmails: Tools.BrowserControl.QuickPress("Left") 
         # Return back to OG position
     
 # Main Function

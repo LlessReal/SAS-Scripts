@@ -7,6 +7,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import pygetwindow as gw
 
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import ActionChains
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys # Needed for sending keys
+
 
 def OnlineOCR(AramarkInvoice):
     Tools.BrowserControl.driver.get("https://www.onlineocr.net/")
@@ -24,14 +32,20 @@ def OnlineOCR(AramarkInvoice):
     return Tools.BrowserControl.CommitActionOnElement("//textarea[@id='MainContent_txtOCRResultText']","Grab Text")
 
 
-def NewOCR(AramarkInvoice):
+def NewOCR(Document):
+    AllOCRText = ""
     Tools.BrowserControl.driver.get("https://www.newocr.com/")
-    Tools.BrowserControl.CommitActionOnElement("//input[@id='userfile']",AramarkInvoice)
-    
+    Tools.BrowserControl.CommitActionOnElement("//input[@id='userfile']",Document)
     Tools.BrowserControl.driver.find_element(By.XPATH, "//button[@id='preview']").click() 
     Tools.BrowserControl.CommitActionOnElement("//button[@id='ocr']","ClickElement") 
-    
-    return Tools.BrowserControl.CommitActionOnElement("//textarea[@id='ocr-result']","Grab Text") 
+    # Go through each page
+    pagenumdropdown = Select(Tools.BrowserControl.driver.find_element(By.XPATH, "//select[@id='page']"))
+    OptionsList = [dropdownoption.text for dropdownoption in pagenumdropdown.options]
+    for option in OptionsList: 
+        pagenumdropdown = Select(Tools.BrowserControl.driver.find_element(By.XPATH, "//select[@id='page']"))
+        pagenumdropdown.select_by_visible_text(option); sleep(2)
+        AllOCRText += Tools.BrowserControl.CommitActionOnElement("//textarea[@id='ocr-result']","Grab Text") 
+    return AllOCRText
 
 
 def GetPDFText(PDFPath,Method,ShowText=False,CurrentPath=""):
